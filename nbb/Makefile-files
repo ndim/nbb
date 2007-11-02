@@ -1,0 +1,15 @@
+# -*- makefile -*-
+
+if HAVE_PYTHON
+
+bin_SCRIPTS += nbb/nbb
+EXTRA_DIST  += nbb/nbb.in
+CLEANFILES  += nbb/nbb
+
+nodist_python_PYTHON += nbb/nbb_lib.py
+
+endif
+
+CLEANFILES += nbb/nbb_lib.pyc
+
+# End of Makefile-files.

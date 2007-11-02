@@ -1,0 +1,584 @@
+"""\
+nbb (ndim's branch builder) from @PACKAGE_NAME@ @PACKAGE_VERSION@
+Build, install given branch of source code into a branch specific place
+Copyright (C) 2007,2008 Hans Ulrich Niedermann
+
+Usage: %(prog)s <to-be-determined>
+
+Features:
+ * supports git branches (TBD: git config)
+ * supports bzr branches (requires useful branch nick, TBD: bzr config)
+ * does out-of-source-tree builds (in-source-tree-builds unsupported)
+ * direct support for automake/autoconf based build systems
+ * TBD: supports execution of user commands in source, build, install dirs
+
+TODO:
+ * VCS config support ('git config', etc.)
+ * Build system support: automake/autoconf, cmake
+ * Design nice user interface. Requirements:
+   * print top_srcdir, builddir, installdir
+   * start subshell in top_srcdir, builddir, installdir
+   * run 'autoreconf' type step
+   * run 'configure' type step
+   * run 'make' type step
+   * run 'make install' type step
+   * run custom (make) commands
+ * Bash syntax completion for that user interface.
+ * Man page or something similar.
+
+Command line interface (TBD):
+
+  Run default build commands:
+    $ %(prog)s [general options] init [command specific options]
+    $ %(prog)s [general options] configure [command specific options]
+    $ %(prog)s [general options] build [command specific options]
+    $ %(prog)s [general options] install [command specific options]
+
+  Run cleanup commands:
+    TBD
+
+  Get/set config:
+    $ %(prog)s [general options] config srcdir
+    $ %(prog)s [general options] config builddir [<builddir>]
+    $ %(prog)s [general options] config installdir [<installdir>]
+
+  Start an interactive shell in either of the three directories:
+    $ %(prog)s [general options] src-sh [command specific options]
+    $ %(prog)s [general options] build-sh [command specific options]
+    $ %(prog)s [general options] install-sh [command specific options]
+
+  Run command in builddir:
+    $ %(prog)s [general options] run <command> [<param>...]
+    $ %(prog)s [general options] run [command specific options... <-->] <cmd>...
+
+  (Not sure about these)
+  Run a non-interactive shell command in either of the three directories:
+    $ %(prog)s [general options] src-sh [command specific options] <command>...
+    $ %(prog)s [general options] build-sh [command specific options] <command>...
+    $ %(prog)s [general options] install-sh [command specific options] <cmd...>
+
+Global options:
+
+  -h --help          Print this help text
+  -V --version       Print program version number
+
+  -n --dry-run       Do not actually execute any commands
+
+  -b --build-system  Force buildsystem detection (%(buildsystems)s)
+  -v --vcs           Force VCS detection (%(vcssystems)s)
+"""
+
+import sys
+import os
+import getopt
+
+import subprocess
+import urlparse
+
+
+# Used to make sure nbb_lib and nbb fit together
+version = "@PACKAGE_VERSION@"
+
+
+########################################################################
+# Utility functions
+########################################################################
+
+
+def prog_stdout(call_list):
+    """Run program and return stdout (similar to shell backticks)"""
+    p = subprocess.Popen(call_list,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate(input=None)
+    return stdout.strip()
+
+
+class ProgramRunError(Exception):
+    """A program run returns a retcode != 0"""
+    def __init__(self, call_list, retcode, cwd=None):
+        self.call_list = call_list
+        self.retcode = retcode
+        if cwd:
+            self.cwd = cwd
+        else:
+            self.cwd = os.getcwd()
+    def __str__(self):
+        return ("Error running program (%s, retcode=%d, cwd=%s)"
+                % (repr(self.call_list),
+                   self.retcode,
+                   repr(self.cwd)))
+
+
+def prog_run(call_list):
+    """Run program showing its output. Raise exception if retcode != 0."""
+    print "RUN:", call_list
+    print "  in", os.getcwd()
+    # return None
+    p = subprocess.Popen(call_list)
+    stdout, stderr = p.communicate(input=None)
+    if p.returncode != 0:
+        raise ProgramRunError(call_list, p.returncode, os.getcwd())
+    return p.returncode
+
+
+class AbstractConfig(object):
+    """Return static config until we implement real config reading"""
+    def __init__(self, srcdir, nick):
+        self.srcdir = srcdir
+        self.nick = nick
+    def srcdir(self):
+        return os.path.join(self.srcdir)
+    def builddir(self):
+        return os.path.join(self.srcdir, "_build", self.nick)
+    def installdir(self):
+        return os.path.join(self.srcdir, "_install", self.nick)
+
+
+class CommandLineError(Exception):
+    def __init__(self, message, *args):
+        if args:
+            self.msg = message % args
+        else:
+            self.msg = message
+    def __str__(self):
+        return "Command line error: %s" % self.msg
+
+
+class DuplicatePluginName(Exception):
+    pass
+
+
+class PluginDict(object):
+    """Helper for GenericPluginMeta class
+
+    Behaves basically like a standard dict, but fails when asked
+    to update an existing value.
+    """
+    def __init__(self):
+        self.dict = {}
+    def __getitem__(self, *args):
+        return self.dict.__getitem__(*args)
+    def __setitem__(self, key, value):
+        if self.dict.has_key(key):
+            raise DuplicatePluginName()
+        else:
+            self.dict[key] = value
+    def items(self): return self.dict.items()
+    def keys(self): return self.dict.keys()
+    def values(self): return self.dict.values()
+    def __iter__(self): return self.dict.__iter__()
+    def __str__(self): return self.dict.__str__()
+    def __repr__(self): return self.dict.__repr__()
+    def __len__(self): return self.dict.__len__()
+    def has_key(self, key): return self.dict.has_key(key)
+
+
+########################################################################
+# Generic plugin system
+########################################################################
+# Plugin architecture (metaclass tricks) by Marty Alchin from
+# http://gulopine.gamemusic.org/2008/jan/10/simple-plugin-framework/
+# Slightly modified go store plugins as dict.
+########################################################################
+
+class GenericPluginMeta(type):
+    def __init__(cls, name, bases, attrs):
+        if not hasattr(cls, 'plugins'):
+            # This branch only executes when processing the mount point itself.
+            # So, since this is a new plugin type, not an implementation, this
+            # class shouldn't be registered as a plugin. Instead, it sets up a
+            # list where plugins can be registered later.
+            cls.plugins = PluginDict()
+        elif hasattr(cls, 'name'):
+            # This must be a plugin implementation, which should be registered.
+            # Simply appending it to the list is all that's needed to keep
+            # track of it later.
+            cls.plugins[cls.name] = cls
+        else:
+            # This must be an abstract subclass of plugins.
+            pass
+
+
+########################################################################
+# VCS Source Tree plugin system
+########################################################################
+
+class NotAVCSourceTree(Exception):
+    pass
+
+class AmbigousAVCSource(Exception):
+    def __init__(self, srcdir, matches):
+        super(AmbigousAVCSource, self).__init__()
+        self.srcdir = srcdir
+        self.matches = matches
+    def __str__(self):
+        return ("More than one source tree VCS type detected for '%s': %s"
+                % (self.srcdir, self.matches))
+
+
+class VCSourceTree(object):
+    """
+    Mount point for plugins which refer to actions that can be performed.
+
+    Plugins implementing this reference should provide the following
+    interface:
+
+    name  attribute
+        The text to be displayed, describing the version control system
+    __init__  function
+        Must raise NotAVCSourceTree() if it is not a VCS source tree
+    """
+    __metaclass__ = GenericPluginMeta
+
+    def detect(cls, srcdir):
+        """Detect VCS tree type and return object representing it"""
+        if len(VCSourceTree.plugins) < 1:
+            raise "No VC source tree classes registered"
+        matches = PluginDict()
+        print "VCSourceTree.detect", VCSourceTree.plugins
+        print "srcdir", srcdir
+        for key, klass in VCSourceTree.plugins.items():
+            print "key", key
+            print "klass", klass
+            try:
+                matches[key] = klass(srcdir)
+                print "MATCH:", srcdir
+            except NotAVCSourceTree, e:
+                pass
+        if len(matches) > 1:
+            raise AmbigousAVCSource(srcdir, str(matches.values()))
+        elif len(matches) < 1:
+            raise NotAVCSourceTree(srcdir)
+        print "Matches:", matches
+        return matches[matches.keys()[0]]
+    detect = classmethod(detect)
+
+    def get_config(self):
+        """Get configuration object which determines builddir etc"""
+        return AbstractConfig(self.tree_root(), self.branch_name())
+
+    def tree_root(self):
+        """Get absolute path to source tree root"""
+        raise NotImplementedError()
+
+    def branch_name(self):
+        """Return name identifying the branch"""
+        raise NotImplementedError()
+
+    def __str__(self):
+        return "VCS-Source-Tree(%s, %s, %s)" % (self.name,
+                                                repr(self.tree_root()),
+                                                repr(self.branch_name()))
+
+
+########################################################################
+# Command plugin system
+########################################################################
+
+class Command(object):
+    """
+    Mount point for plugins which refer to commands that can be performed.
+
+    Plugins implementing this reference should provide the following
+    interface:
+
+    name  attribute
+        The text to be displayed, describing the version control system
+    summary attribute
+        Short (less than 50 chars) command summary line
+
+    validate_args(*args, **kwargs)  function
+        Must raise CommandLineError() if it encounters invalid arguments in cmdargs
+    run() function
+        Actually run the function
+
+    FFF(*args, **kwargs)
+        *args are the arguments from the command line
+        **kwargs are additional parameters from within the program
+    """
+    __metaclass__ = GenericPluginMeta
+
+    def __init__(self, *args, **kwargs):
+        self.validate_args(*args, **kwargs)
+        self.args = args
+        self.kwargs = kwargs
+
+    def run(self):
+        """Run the command"""
+        raise NotImplementedError()
+
+    def validate_args(self, *args, **kwargs):
+        """Validate command line arguments"""
+        print "Command: ", self.name
+        print "*args:   ", args
+        print "**kwargs:", kwargs
+	if len(args) > 0:
+            raise CommandLineError("'%s' command takes no parameters", self.name)
+
+    def __str__(self):
+        return "Command(%s, %s)" % (self.cmd_name, self.cmdargs)
+
+
+class HelpCommand(Command):
+    name = 'help'
+    summary = 'print help text'
+    def run(self):
+        print "List of commands:"
+        keys = Command.plugins.keys()
+        keys.sort()
+        for k in keys:
+           print "\t%-15s\t%s" % (k, Command.plugins[k].summary)
+
+class InternalConfigCommand(Command):
+    name = 'internal-config'
+    summary = 'print internal program configuration'
+    def run(self):
+        print "Source tree types:",  ", ".join(VCSourceTree.plugins.keys())
+        print "Build system types:", ", ".join(BSSourceTree.plugins.keys())
+        print "Commands:",           ", ".join(Command.plugins.keys())
+
+class SourceClassCommand(Command):
+    """Base class for commands acting on source trees"""
+    def __init__(self, *args, **kwargs):
+        super(SourceClassCommand, self).__init__(*args, **kwargs)
+        srcdir = os.getcwd()
+        absdir = os.path.abspath(srcdir)
+        self.vcs_sourcetree = VCSourceTree.detect(absdir)
+        print "vcs_sourcetree", str(self.vcs_sourcetree)
+        assert(self.vcs_sourcetree)
+        self.bs_sourcetree = BSSourceTree.detect(self.vcs_sourcetree)
+        print "bs_sourcetree", str(self.bs_sourcetree)
+
+class BuildTestCommand(SourceClassCommand):
+    name = 'build-test'
+    summary = 'simple build test'
+    def run(self):
+        self.bs_sourcetree.init()
+        self.bs_sourcetree.configure()
+        self.bs_sourcetree.build()
+        self.bs_sourcetree.install()
+
+
+########################################################################
+# VCS Source Tree plugins
+########################################################################
+
+class GitSourceTree(VCSourceTree):
+
+    name = 'git'
+
+    def __init__(self, srcdir):
+        os.chdir(srcdir)
+        if "true" != prog_stdout(["git", "rev-parse",
+                                  "--is-inside-work-tree"]):
+            raise NotAVCSourceTree()
+        reldir = prog_stdout(["git", "rev-parse", "--show-cdup"])
+        if reldir:
+            os.chdir(reldir)
+        self.__tree_root = os.getcwd()
+
+    def tree_root(self):
+        return self.__tree_root
+
+    def branch_name(self):
+        bname = prog_stdout(["git", "symbolic-ref", "HEAD"])
+        refs,heads,branch = bname.split('/')
+        assert(refs=='refs' and heads=='heads')
+        return branch
+
+
+class BzrSourceTree(VCSourceTree):
+
+    name = 'bzr'
+
+    def __init__(self, srcdir):
+        try:
+            import bzrlib.workingtree
+            wt,b = bzrlib.workingtree.WorkingTree.open_containing(srcdir)
+        except bzrlib.errors.NotBranchError:
+            raise NotAVCSourceTree()
+        except ImportError:
+            raise NotAVCSourceTree()
+        self.wt = wt
+        #print "wt:", wt
+        #print "wt:", dir(wt)
+        #print "wt.branch:", wt.branch
+        #print "wt.branch:", dir(wt.branch)
+        #print "wt.branch.nick:", wt.branch.nick
+        #print "wt.branch.abspath:", wt.branch.abspath
+        #print "wt.branch.base:", wt.branch.base
+        #print "wt.branch.basis_tree:", wt.branch.basis_tree()
+
+    def tree_root(self):
+        proto,host,path,some,thing = urlparse.urlsplit(self.wt.branch.base)
+        assert(proto == "file" and host == "")
+        assert(some == "" and thing == "")
+        return path
+
+    def branch_name(self):
+        return self.wt.branch.nick
+
+
+########################################################################
+# Buildsystem Source Tree plugins
+########################################################################
+
+class NotABSSourceTree(Exception): pass
+
+
+class BSSourceTree(object):
+    __metaclass__ = GenericPluginMeta
+
+    def detect(cls, vcs_tree):
+        """Find BS tree type and return it"""
+        if len(BSSourceTree.plugins) < 1:
+            raise "No BS source tree classes registered"
+        matches = PluginDict()
+        for key, klass in BSSourceTree.plugins.items():
+            try:
+                t = klass(vcs_tree)
+                matches[key] = t
+            except NotABSSourceTree:
+                pass
+        if len(matches) > 1:
+            raise ("More than one source tree BS type detected for '%s': %s"
+                   % (vcs_tree, ", ".join(map(lambda x:str(x), matches))))
+        elif len(matches) < 1:
+            raise "Source tree type for '%s' not detected" % (vcs_tree,)
+        print "Matches:", matches
+        return matches[matches.keys()[0]]
+    detect = classmethod(detect)
+
+    def __str__(self):
+        return "BS-Source-Tree(%s, %s)" % (self.name,
+                                           repr(self.tree_root()))
+
+    # Abstract methods
+    def tree_root(self): raise NotImplementedError()
+    def init(self): raise NotImplementedError()
+    def configure(self): raise NotImplementedError()
+    def build(self): raise NotImplementedError()
+    def install(self): raise NotImplementedError()
+
+
+class AutomakeSourceTree(BSSourceTree):
+    name = 'automake'
+    def __init__(self, vcs_tree):
+        srcdir = vcs_tree.tree_root()
+        self.config = vcs_tree.get_config()
+        flag = False
+        for f in [ os.path.join(srcdir, 'configure.ac'),
+                   os.path.join(srcdir, 'configure.in'),
+                   ]:
+            if os.path.exists(f):
+                flag = True
+                break
+        if not flag:
+            raise NotABSSourceTree()
+        self.srcdir = srcdir
+
+    def tree_root(self):
+        return self.srcdir
+
+    def init(self):
+        """'autoreconf'"""
+        prog_run(["autoreconf", "-v", "-i", "-s", self.srcdir])
+
+    def configure(self):
+        """'configure --prefix'"""
+        builddir = self.config.builddir()
+        if not os.path.exists(builddir): os.makedirs(builddir)
+        os.chdir(builddir)
+        prog_run(["%s/configure" % self.srcdir,
+                  "--prefix=%s" % self.config.installdir()
+                  ])
+
+    def build(self):
+        """'make'"""
+        os.chdir(self.config.builddir())
+        prog_run(["make", ])
+
+    def install(self):
+        """'make install'"""
+        os.chdir(self.config.builddir())
+        prog_run(["make", "install", "INSTALL=/usr/bin/install -p"])
+
+
+########################################################################
+# Commands
+########################################################################
+
+class NBB_Command(object):
+    def __init__(self, cmd, cmdargs):
+        if Command.plugins.has_key(cmd):
+            try:
+                c = Command.plugins[cmd](*cmdargs)
+                c.run()
+            except CommandLineError, e:
+                print "%(prog)s: Fatal:" % (outdict), e
+                sys.exit(2)
+            except ProgramRunError, e:
+                print "%(prog)s: Fatal:" % (outdict), e
+                print "Program aborted."
+        else:
+            print "Fatal: Unknown command '%s'" % cmd
+	    raise NotImplementedError()
+        return
+
+
+########################################################################
+# Main program
+########################################################################
+
+
+outdict = {}
+outdict['vcssystems']   = ", ".join(VCSourceTree.plugins.keys())
+outdict['buildsystems'] = ", ".join(BSSourceTree.plugins.keys())
+
+
+def print_help():
+    print __doc__ % outdict,
+
+
+def main(argv):
+
+    prog = argv[0]
+    idx = prog.rfind('/')
+    if idx >= 0:
+        prog = prog[idx+1:]
+    outdict['prog'] = prog
+
+    if len(argv) < 2:
+        print "Fatal: %(prog)s requires some arguments" % outdict
+        return 2
+
+    verbosity = 0
+    i = 1
+    while i<len(argv):
+        if argv[i][0] != '-':
+            break
+        if argv[i] in ('-h', '--help'):
+            print_help()
+            return
+        elif argv[i] in ('-V', '--version'):
+            print "%(prog)s (@PACKAGE_NAME@) @PACKAGE_VERSION@" % outdict
+            return
+        elif argv[i] in ('-v', '--verbose'):
+            verbosity = verbosity + 1
+        elif argv[i] in ('-q', '--quiet'):
+            verbosity = verbosity - 1
+        print "", i, argv[i]
+        i = i + 1
+    cmd = argv[i]
+    cmdargs = argv[i+1:]
+    nbb = NBB_Command(cmd, cmdargs)
+
+
+if __name__ == '__main__':
+    raise "This is not a library"
+
+# vim: syntax=python
+# Local Variables:
+# mode: python
+# End:
