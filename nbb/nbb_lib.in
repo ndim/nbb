@@ -127,11 +127,12 @@ class ProgramRunError(Exception):
                    repr(self.cwd)))
 
 
-def prog_run(call_list):
+def prog_run(call_list, context):
     """Run program showing its output. Raise exception if retcode != 0."""
     print "RUN:", call_list
     print "  in", os.getcwd()
-    # return None
+    if context.dry_run:
+        return None
     p = subprocess.Popen(call_list)
     stdout, stderr = p.communicate(input=None)
     if p.returncode != 0:
@@ -248,7 +249,12 @@ class VCSourceTree(object):
     """
     __metaclass__ = GenericPluginMeta
 
-    def detect(cls, srcdir):
+    def __init__(self, context):
+        super(VCSourceTree, self).__init__()
+        self.context = context
+
+    @classmethod
+    def detect(cls, srcdir, context):
         """Detect VCS tree type and return object representing it"""
         if len(VCSourceTree.plugins) < 1:
             raise "No VC source tree classes registered"
@@ -259,7 +265,7 @@ class VCSourceTree(object):
             print "key", key
             print "klass", klass
             try:
-                matches[key] = klass(srcdir)
+                matches[key] = klass(srcdir, context)
                 print "MATCH:", srcdir
             except NotAVCSourceTree, e:
                 pass
@@ -269,7 +275,6 @@ class VCSourceTree(object):
             raise NotAVCSourceTree(srcdir)
         print "Matches:", matches
         return matches[matches.keys()[0]]
-    detect = classmethod(detect)
 
     def get_config(self):
         """Get configuration object which determines builddir etc"""
@@ -324,6 +329,7 @@ class Command(object):
         self.validate_args(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
+        self.context = kwargs['context']
 
     def run(self):
         """Run the command"""
@@ -398,12 +404,13 @@ class SourceClassCommand(Command):
     """Base class for commands acting on source trees"""
     def __init__(self, *args, **kwargs):
         super(SourceClassCommand, self).__init__(*args, **kwargs)
+        context = kwargs['context']
         srcdir = os.getcwd()
         absdir = os.path.abspath(srcdir)
-        self.vcs_sourcetree = VCSourceTree.detect(absdir)
+        self.vcs_sourcetree = VCSourceTree.detect(absdir, context)
         print "vcs_sourcetree", str(self.vcs_sourcetree)
         assert(self.vcs_sourcetree)
-        self.bs_sourcetree = BSSourceTree.detect(self.vcs_sourcetree)
+        self.bs_sourcetree = BSSourceTree.detect(self.vcs_sourcetree, context)
         print "bs_sourcetree", str(self.bs_sourcetree)
 
 
@@ -425,7 +432,8 @@ class GitSourceTree(VCSourceTree):
 
     name = 'git'
 
-    def __init__(self, srcdir):
+    def __init__(self, srcdir, context):
+        super(GitSourceTree, self).__init__(context)
         os.chdir(srcdir)
         if "true" != prog_stdout(["git", "rev-parse",
                                   "--is-inside-work-tree"]):
@@ -449,7 +457,8 @@ class BzrSourceTree(VCSourceTree):
 
     name = 'bzr'
 
-    def __init__(self, srcdir):
+    def __init__(self, srcdir, context):
+        super(BzrSourceTree, self).__init__(context)
         try:
             import bzrlib.workingtree
             wt,b = bzrlib.workingtree.WorkingTree.open_containing(srcdir)
@@ -487,14 +496,19 @@ class NotABSSourceTree(Exception): pass
 class BSSourceTree(object):
     __metaclass__ = GenericPluginMeta
 
-    def detect(cls, vcs_tree):
+    def __init__(self, context):
+        super(BSSourceTree, self).__init__()
+        self.context = context
+
+    @classmethod
+    def detect(cls, vcs_tree, context):
         """Find BS tree type and return it"""
         if len(BSSourceTree.plugins) < 1:
             raise "No BS source tree classes registered"
         matches = PluginDict()
         for key, klass in BSSourceTree.plugins.items():
             try:
-                t = klass(vcs_tree)
+                t = klass(vcs_tree, context)
                 matches[key] = t
             except NotABSSourceTree:
                 pass
@@ -505,7 +519,6 @@ class BSSourceTree(object):
             raise "Source tree type for '%s' not detected" % (vcs_tree,)
         print "Matches:", matches
         return matches[matches.keys()[0]]
-    detect = classmethod(detect)
 
     def __str__(self):
         return "BS-Source-Tree(%s, %s)" % (self.name,
@@ -521,7 +534,8 @@ class BSSourceTree(object):
 
 class AutomakeSourceTree(BSSourceTree):
     name = 'automake'
-    def __init__(self, vcs_tree):
+    def __init__(self, vcs_tree, context):
+        super(AutomakeSourceTree, self).__init__(context)
         srcdir = vcs_tree.tree_root()
         self.config = vcs_tree.get_config()
         flag = False
@@ -540,7 +554,7 @@ class AutomakeSourceTree(BSSourceTree):
 
     def init(self):
         """'autoreconf'"""
-        prog_run(["autoreconf", "-v", "-i", "-s", self.srcdir])
+        prog_run(["autoreconf", "-v", "-i", "-s", self.srcdir], self.context)
 
     def configure(self):
         """'configure --prefix'"""
@@ -549,17 +563,17 @@ class AutomakeSourceTree(BSSourceTree):
         os.chdir(builddir)
         prog_run(["%s/configure" % self.srcdir,
                   "--prefix=%s" % self.config.installdir()
-                  ])
+                  ], self.context)
 
     def build(self):
         """'make'"""
         os.chdir(self.config.builddir())
-        prog_run(["make", ])
+        prog_run(["make", ], self.context)
 
     def install(self):
         """'make install'"""
         os.chdir(self.config.builddir())
-        prog_run(["make", "install", "INSTALL=/usr/bin/install -p"])
+        prog_run(["make", "install", "INSTALL=/usr/bin/install -p"], self.context)
 
 
 ########################################################################
@@ -567,10 +581,10 @@ class AutomakeSourceTree(BSSourceTree):
 ########################################################################
 
 class NBB_Command(object):
-    def __init__(self, cmd, cmdargs):
+    def __init__(self, cmd, cmdargs, context):
         if Command.plugins.has_key(cmd):
             try:
-                c = Command.plugins[cmd](*cmdargs)
+                c = Command.plugins[cmd](*cmdargs, **{'context':context})
                 c.run()
             except CommandLineError, e:
                 print "%(prog)s: Fatal:" % (outdict), e
@@ -598,6 +612,55 @@ def print_help():
     print __doc__ % outdict,
 
 
+class Property(object):
+    def __init__(self, **kwargs):
+        if kwargs.has_key('default'):
+            self.default = kwargs['default']
+    def __get__(self, instance, owner):
+        if hasattr(self, 'value'):
+            return self.value
+        elif hasattr(self, 'default'):
+            return self.default
+        else:
+            return None
+    def __set__(self, instance, value):
+        if hasattr(self, 'value'):
+            raise "Property cannot be set more than once"
+        elif not self.isvalid(value):
+            raise "Property cannot be set to invalid value '%s'" % value
+        else:
+            self.value = value
+    def __str__(self):
+        if hasattr(self, 'value'):
+            return self.value
+        else:
+            return '<undefined property>'
+    def isvalid(self, value):
+        return True
+
+
+class VCSProperty(Property):
+    def isvalid(self, value):
+        return (value in VCSourceTree.plugins.keys())
+
+
+class BSProperty(Property):
+    def isvalid(self, value):
+        return (value in BSSourceTree.plugins.keys())
+
+
+class DryRunProperty(Property):
+    def __init__(self):
+        super(DryRunProperty, self).__init__(default=False)
+    def isvalid(self, value):
+        return (value in (True, False))
+
+
+class Context(object):
+    vcs = VCSProperty()
+    bs = BSProperty()
+    dry_run = DryRunProperty()
+
 def main(argv):
 
     prog = argv[0]
@@ -612,6 +675,7 @@ def main(argv):
 
     verbosity = 0
     i = 1
+    ctx = Context()
     while i<len(argv):
         if argv[i][0] != '-':
             break
@@ -621,15 +685,29 @@ def main(argv):
         elif argv[i] in ('-V', '--version'):
             print "%(prog)s (ndim's branch builder) @PACKAGE_VERSION@" % outdict
             return
-        elif argv[i] in ('-v', '--verbose'):
+        elif argv[i] in ('-n', '--dry-run'):
+            ctx.dry_run = True
+        elif argv[i] in ('-b', '--build-system'):
+            i = i + 1
+            assert(i<len(argv))
+            ctx.bs = argv[i]
+        elif argv[i][:6] == '--build-system=':
+            ctx.bs = argv[i][6:]
+        elif argv[i] in ('-v', '--vcs'):
+            i = i + 1
+            assert(i<len(argv))
+            ctx.vcs = argv[i]
+        elif argv[i][:6] == '--vcs=':
+            ctx.vcs = argv[i][6:]
+        elif argv[i] in ('--verbose', ):
             verbosity = verbosity + 1
-        elif argv[i] in ('-q', '--quiet'):
+        elif argv[i] in ('--quiet', ):
             verbosity = verbosity - 1
-        print "", i, argv[i]
+        # print "", i, argv[i]
         i = i + 1
     cmd = argv[i]
     cmdargs = argv[i+1:]
-    nbb = NBB_Command(cmd, cmdargs)
+    nbb = NBB_Command(cmd, cmdargs, context=ctx)
 
 
 if __name__ == '__main__':
