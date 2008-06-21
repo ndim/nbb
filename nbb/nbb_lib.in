@@ -86,6 +86,22 @@ version = "@PACKAGE_VERSION@"
 ########################################################################
 
 
+def adjust_doc(doc):
+    """Remove common whitespace at beginning of doc string lines"""
+    if not doc: return doc
+    i = 0
+    for i in range(len(doc)):
+        if doc[i] not in " \t":
+            break
+    prefix = doc[:i]
+    rest_doc = doc[i:]
+    almost_doc = rest_doc.replace("\n%s" % prefix, "\n")
+    i = -1
+    while almost_doc[i] == '\n':
+        i = i - 1
+    return almost_doc[:i]
+
+
 def prog_stdout(call_list):
     """Run program and return stdout (similar to shell backticks)"""
     p = subprocess.Popen(call_list,
@@ -288,6 +304,8 @@ class Command(object):
         The text to be displayed, describing the version control system
     summary attribute
         Short (less than 50 chars) command summary line
+    usage attribute
+        Usage string (defaults to '')
 
     validate_args(*args, **kwargs)  function
         Must raise CommandLineError() if it encounters invalid arguments in cmdargs
@@ -299,6 +317,8 @@ class Command(object):
         **kwargs are additional parameters from within the program
     """
     __metaclass__ = GenericPluginMeta
+
+    usage = ''
 
     def __init__(self, *args, **kwargs):
         self.validate_args(*args, **kwargs)
@@ -322,14 +342,48 @@ class Command(object):
 
 
 class HelpCommand(Command):
+    """\
+    If the optional <command> is given, print the help for <command>.
+    Else, print a list of commands and general help.
+    """
+
     name = 'help'
     summary = 'print help text'
-    def run(self):
+    usage = '[<command>]'
+
+    def validate_args(self, *args, **kwargs):
+        if len(args) == 1 and args[0] not in Command.plugins.keys():
+            raise CommandLineError("'%s' is an invalid command name", args[0])
+        elif len(args) > 1:
+            raise CommandLineError("'%s' command only takes one optional parameter", self.name)
+
+    def _print_command_list(self):
         print "List of commands:"
         keys = Command.plugins.keys()
         keys.sort()
         for k in keys:
            print "\t%-15s\t%s" % (k, Command.plugins[k].summary)
+
+    def _print_command_help(self, cmd):
+        """print help for command cmd"""
+        c = Command.plugins[cmd]
+        print "Purpose:", c.summary
+        if c.usage:
+            print "Usage:  ", outdict['prog'], cmd, c.usage
+        else:
+            print "Usage:  ", outdict['prog'], cmd
+        if hasattr(c, '__doc__'):
+            if c.__doc__:
+                print
+                print adjust_doc(c.__doc__)
+
+    def run(self):
+        if len(self.args) == 0:
+            self._print_command_list()
+        elif len(self.args) == 1:
+            self._print_command_help(self.args[0])
+        else:
+            assert(False)
 
 class InternalConfigCommand(Command):
     name = 'internal-config'
@@ -338,6 +392,7 @@ class InternalConfigCommand(Command):
         print "Source tree types:",  ", ".join(VCSourceTree.plugins.keys())
         print "Build system types:", ", ".join(BSSourceTree.plugins.keys())
         print "Commands:",           ", ".join(Command.plugins.keys())
+
 
 class SourceClassCommand(Command):
     """Base class for commands acting on source trees"""
@@ -350,6 +405,7 @@ class SourceClassCommand(Command):
         assert(self.vcs_sourcetree)
         self.bs_sourcetree = BSSourceTree.detect(self.vcs_sourcetree)
         print "bs_sourcetree", str(self.bs_sourcetree)
+
 
 class BuildTestCommand(SourceClassCommand):
     name = 'build-test'
