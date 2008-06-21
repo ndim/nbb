@@ -11,7 +11,7 @@ AT_SETUP([nbb: --version option])
 AT_KEYWORDS([nbb version])
 AT_CHECK([nbb --version],
 [0],
-[nbb (ndims git utilities) AT_PACKAGE_VERSION
+[nbb (ndim's branch builder) AT_PACKAGE_VERSION
 ])
 AT_CLEANUP()
 
