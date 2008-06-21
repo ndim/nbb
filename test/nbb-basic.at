@@ -15,6 +15,14 @@ AT_CHECK([nbb --version],
 ])
 AT_CLEANUP()
 
+AT_SETUP([nbb: --version package name consistency])
+AT_KEYWORDS([nbb version])
+AT_CHECK([nbb --version | sed 's/^@<:@^(@:>@*(//; s/)@<:@^)@:>@*$//' | sed "s/'//"],
+[0],
+[AT_PACKAGE_NAME
+])
+AT_CLEANUP()
+
 dnl ===================================================================
 
 AT_SETUP([nbb: --help option])
