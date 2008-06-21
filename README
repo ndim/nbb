@@ -1,52 +1,37 @@
 ========================================================================
-ndim's git utilities - a collection of scripts and docs around git
-Copyright (C) 2007, 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
+ndim's branch builder
+Build, install given branch of source code into a branch specific place
+Copyright (C) 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
+License conditions TBA
 ========================================================================
 
+Status: experimental
 
-The utilities in detail
-=======================
+Features:
 
-  git-amb (status: stable)
-    Makes building, installing, and testing multiple git branches of
-    some source tree built with automake easy, clean and flexible.
-    The name stands for "git *a*uto*m*ake *b*uild". For details, see
-    git-amb(1) man page.
+  * Handles git and bzr.
+  * Handles automake/autoconf.
 
-  git-buildmsg (status: testing)
-    Generate .h file containing information about the current git
-    working tree. Useful for programs' version messages in logs etc.
-    Generating the version message from git describe output appears
-    to be much cleaner, though.
-
-  git-rebase-subtree (status: stale)
-    Rebase not only a single branch, but a whole "subtree of branches".
-    Useful for maintaining your own subtree of branches close to some
-    upstream's branch.
-    Probably obsoleted by automatic branch..rebase setup in git 1.5.6.
-
-  nbb (status: experimental)
-    ndim's branch builder
-    Genericized extrapolation of git-amb.
-      Handles git and bzr.
-      Handles automake/autoconf.
-    Still very much work in progress, only useful for nbb development.
+nbb is still very much work in progress, and currently only useful
+if you actually are hacking on nbb.
 
 
 Updates
 =======
 
   Home page:
-    http://nix.lauft.net/ndim-git-utils.git/
+    TBA
 
   Git repository:
-    $ git clone http://nix.lauft.net/ndim-git-utils.git/
+    $ git clone TBA
 
 
 License
 =======
 
-  Partly MIT, partly GPL. Shared parts dual-licensed.
+  TBA. MIT? GPL? Something like that.
+
+  bzr is GPLv2+, i.e. if nbb directly uses bzr, GPLv2+ looks good.
 
 
 ========================================================================

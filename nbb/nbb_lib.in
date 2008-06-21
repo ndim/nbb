@@ -1,7 +1,8 @@
 """\
 nbb (ndim's branch builder) @PACKAGE_VERSION@
 Build, install given branch of source code into a branch specific place
-Copyright (C) 2007,2008 Hans Ulrich Niedermann
+Copyright (C) 2007, 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
+License conditions TBA
 
 Usage: %(prog)s <to-be-determined>
 
