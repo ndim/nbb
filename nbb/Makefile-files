@@ -52,5 +52,13 @@ endif
 clean-local: clean-local-nbblib
 clean-local-nbblib:
 	rm -f nbb/nbblib/*.pyc
+	@top_srcdir="$$(cd "$(top_srcdir)" > /dev/null 2>&1 && pwd)"; \
+	top_builddir="$$(cd "$(top_builddir)" > /dev/null 2>&1 && pwd)"; \
+	if test "x$${top_srcdir}" = "x$${top_builddir}"; then :; else \
+		for f in $(nbblib_PYTHON); do \
+			echo rm -f "$(top_builddir)/$$f"; \
+			rm -f "$(top_builddir)/$$f"; \
+		done; \
+	fi
 
 # End of Makefile-files.
