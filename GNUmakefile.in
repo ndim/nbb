@@ -7,9 +7,9 @@ git_version := $(shell $(top_srcdir)/build-helpers/package-version $(top_srcdir)
 ifneq ($(PACKAGE_VERSION),$(git_version))
 $(info autoconf and git versions do not match: $(PACKAGE_VERSION) vs $(git_version))
 $(info Removing autom4te.cache and related files and re-running autoreconf)
-$(shell rm -rf $(top_srcdir)/autom4te.cache)
-$(shell rm -f $(top_srcdir)/test/package.m4 $(top_srcdir)/test/testsuite)
-$(shell $(AUTORECONF) $(AUTORECONF_OPTS) $(top_srcdir))
+dummy1 := $(shell rm -rf $(top_srcdir)/autom4te.cache)
+dummy2 := $(shell rm -f $(top_srcdir)/test/package.m4 $(top_srcdir)/test/testsuite)
+dummy3 := $(shell $(AUTORECONF) $(AUTORECONF_OPTS) $(top_srcdir))
 endif
 
 # vim: syntax=make
