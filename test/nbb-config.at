@@ -12,7 +12,7 @@ AT_CHECK([cd test.git && git init], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_DATA([test.git/configure.ac], [dnl
-AC[_]INIT(nbb-test, 1.2.3, invalid@invalid.invalid)
+AC[_]INIT(nbb-test-git, 1.2.3, invalid@invalid.invalid)
 AC[_]OUTPUT
 ])
 AT_CHECK([echo "$PWD/test.git" > expout
@@ -33,7 +33,7 @@ AT_CHECK([cd test.git && git init], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_DATA([test.git/configure.ac], [dnl
-AC[_]INIT(nbb-test, 1.2.3, invalid@invalid.invalid)
+AC[_]INIT(nbb-test-git, 1.2.3, invalid@invalid.invalid)
 AC[_]OUTPUT
 ])
 AT_CHECK([echo "$PWD/test.git" > expout
@@ -52,18 +52,22 @@ AT_CLEANUP()
 
 dnl ===================================================================
 
-dnl AT_SETUP([nbb: bzr config defaults])
-dnl AT_KEYWORDS([nbb bzr config])
-dnl AT_CHECK([mkdir test.bzr && cd test.bzr])
-dnl AT_CHECK([cd test.bzr && bzr init])
-dnl echo "$PWD/test.bzr" > expout
-dnl AT_CHECK([cd test.bzr && nbb config srcdir], [0], [expout])
-dnl echo "$PWD/test.bzr/_build" > expout
-dnl AT_CHECK([cd test.bzr && nbb config builddir], [0], [expout])
-dnl echo "$PWD/test.bzr/_install" > expout
-dnl AT_CHECK([cd test.bzr && nbb config installdir], [0], [expout])
-dnl AT_CHECK([rm -rf test.git])
-dnl AT_CLEANUP()
+AT_SETUP([nbb: bzr config defaults])
+AT_KEYWORDS([nbb bzr config])
+AT_CHECK([mkdir test.bzr && cd test.bzr])
+AT_CHECK([cd test.bzr && bzr init && bzr nick testnick])
+echo "$PWD/test.bzr" > expout
+AT_DATA([test.bzr/configure.ac], [dnl
+AC[_]INIT(nbb-test-bzr, 1.2.3, invalid@invalid.invalid)
+AC[_]OUTPUT
+])
+AT_CHECK([cd test.bzr && nbb config srcdir], [0], [expout])
+echo "$PWD/test.bzr/_build/testnick" > expout
+AT_CHECK([cd test.bzr && nbb config builddir], [0], [expout])
+echo "$PWD/test.bzr/_install/testnick" > expout
+AT_CHECK([cd test.bzr && nbb config installdir], [0], [expout])
+AT_CHECK([rm -rf test.git])
+AT_CLEANUP()
 
 dnl ===================================================================
 

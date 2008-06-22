@@ -245,14 +245,19 @@ class GenericPluginMeta(type):
 class NotAVCSourceTree(Exception):
     pass
 
-class AmbigousAVCSource(Exception):
+
+class AmbigousVCSource(Exception):
     def __init__(self, srcdir, matches):
-        super(AmbigousAVCSource, self).__init__()
+        super(AmbigousVCSource, self).__init__()
         self.srcdir = srcdir
         self.matches = matches
     def __str__(self):
-        return ("More than one source tree VCS type detected for '%s': %s"
-                % (self.srcdir, self.matches))
+        fmt = "  %-9s %-15s %s"
+        def strmatch(m):
+            return fmt % (m.name, m.branch_name(), m.tree_root())
+        alist = [fmt % ('VCS Type', 'Branch Name', 'Source tree root')] + map(strmatch, self.matches)
+        return ("More than one source tree VCS type detected for '%s':\n#%s"
+                % (self.srcdir, '\n '.join(alist)))
 
 
 class VCSourceTree(object):
@@ -281,11 +286,13 @@ class VCSourceTree(object):
         matches = PluginDict()
         for key, klass in VCSourceTree.plugins.items():
             try:
-                matches[key] = klass(srcdir, context)
+                t = klass(srcdir, context)
+                if t.tree_root() == srcdir:
+                    matches[key] = t
             except NotAVCSourceTree, e:
                 pass
         if len(matches) > 1:
-            raise AmbigousAVCSource(srcdir, str(matches.values()))
+            raise AmbigousVCSource(srcdir, matches.values())
         elif len(matches) < 1:
             raise NotAVCSourceTree(srcdir)
         return matches[matches.keys()[0]]
@@ -304,9 +311,12 @@ class VCSourceTree(object):
         raise NotImplementedError()
 
     def __str__(self):
-        return "VCS-Source-Tree(%s, %s, %s)" % (self.name,
-                                                repr(self.tree_root()),
-                                                repr(self.branch_name()))
+        return repr(self)
+
+    def __repr__(self):
+        return "<%s(%s, %s)>" % (self.__class__.__name__,
+                                 repr(self.tree_root()),
+                                 repr(self.branch_name()))
 
 
 ########################################################################
@@ -585,7 +595,7 @@ class BzrSourceTree(VCSourceTree):
         proto,host,path,some,thing = urlparse.urlsplit(self.wt.branch.base)
         assert(proto == "file" and host == "")
         assert(some == "" and thing == "")
-        return path
+        return os.path.abspath(path)
 
     def branch_name(self):
         return self.wt.branch.nick
@@ -595,7 +605,26 @@ class BzrSourceTree(VCSourceTree):
 # Buildsystem Source Tree plugins
 ########################################################################
 
-class NotABSSourceTree(Exception): pass
+class NotABSSourceTree(Exception):
+    def __init__(self, vcs_tree):
+        super(NotABSSourceTree, self).__init__()
+        self.vcs_tree = vcs_tree
+    def __str__(self):
+        return "Source tree build system type for '%s' not detected" % (self.vcs_tree,)
+
+
+class AmbigousBSSource(Exception):
+    def __init__(self, srcdir, matches):
+        super(AmbigousBSSource, self).__init__()
+        self.srcdir = srcdir
+        self.matches = matches
+    def __str__(self):
+        fmt = "  %-9s %s"
+        def strmatch(m):
+            return fmt % (m.name, m.tree_root())
+        alist = [fmt % ('VCS Type', 'Source tree root')] + map(strmatch, self.matches)
+        return ("More than one source tree VCS type detected for '%s':\n#%s"
+                % (self.srcdir, '\n '.join(alist)))
 
 
 class BSSourceTree(object):
@@ -614,14 +643,15 @@ class BSSourceTree(object):
         for key, klass in BSSourceTree.plugins.items():
             try:
                 t = klass(vcs_tree, context)
-                matches[key] = t
-            except NotABSSourceTree:
+                if t.tree_root() == vcs_tree.tree_root():
+                    matches[key] = t
+            except NotABSSourceTree, e:
                 pass
         if len(matches) > 1:
             raise ("More than one source tree BS type detected for '%s': %s"
                    % (vcs_tree, ", ".join(map(lambda x:str(x), matches))))
         elif len(matches) < 1:
-            raise "Source tree build system type for '%s' not detected" % (vcs_tree,)
+            raise NotABSSourceTree(vcs_tree)
         return matches[matches.keys()[0]]
 
     def __str__(self):
@@ -650,7 +680,7 @@ class AutomakeSourceTree(BSSourceTree):
                 flag = True
                 break
         if not flag:
-            raise NotABSSourceTree()
+            raise NotABSSourceTree(vcs_tree)
 
     def tree_root(self):
         return self.config.srcdir
