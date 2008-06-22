@@ -18,9 +18,15 @@ Features:
  * direct support for automake/autoconf based build systems
  * TBD: supports execution of user commands in source, build, install dirs
 
-TODO:
+DONE:
  * VCS config support ('git config', etc.)
- * Build system support: automake/autoconf, cmake
+ * Build system support: automake/autoconf
+
+TODO:
+ * Build system support: cmake, ...
+ * Fine-tune init, configure, build, install commands with knowledge
+   gained with git-amb.
+ * implement *-sh and *-run commands
  * Design nice user interface. Requirements:
    * print top_srcdir, builddir, installdir
    * start subshell in top_srcdir, builddir, installdir
