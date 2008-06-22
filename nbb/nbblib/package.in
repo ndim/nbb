@@ -1,0 +1,8 @@
+# Used to make sure nbb_lib and nbb fit together
+PACKAGE_VERSION = "@PACKAGE_VERSION@"
+GIT_CONFIG_PREFIX = 'nbb'
+
+# vim: syntax=python
+# Local Variables:
+# mode: python
+# End:

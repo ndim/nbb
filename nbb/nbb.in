@@ -9,29 +9,37 @@ License conditions TBA
 import sys
 import os
 
+PACKAGE_VERSION = "@PACKAGE_VERSION@"
+
 if __name__ == '__main__':
    pythondir = "@pythondir@"
    lib_found = False
+   #print "pythondir", pythondir
+   #print "sys.path", sys.path
+   sys.stdout.flush()
+   orig_path = sys.path
    for cond, path in [
-      (1, sys.path),
-      (os.path.exists(pythondir), [pythondir] + sys.path),
+      (True, orig_path),
+      (os.path.exists(pythondir), [pythondir] + orig_path),
       ]:
       if cond:
          sys.path = path
          try:
             import nbblib
+            #print "nbblib.PACKAGE_VERSION", nbblib.PACKAGE_VERSION
+            #print "PACKAGE_VERSION", PACKAGE_VERSION
+            assert(nbblib.PACKAGE_VERSION == PACKAGE_VERSION)
             lib_found = True
             break
+         except AssertionError, e:
+            sys.path = orig_path
          except ImportError, e:
-            pass
+            sys.path = orig_path
    if not lib_found:
       sys.stderr.write("nbb: Fatal: Could not load nbblib.\n")
       sys.exit(3)
-   #sys.stdout.write("sys.path=%s\n" % repr(sys.path))
-   #sys.stdout.flush()
-   PACKAGE_VERSION = "@PACKAGE_VERSION@"
-   assert(nbblib.PACKAGE_VERSION == PACKAGE_VERSION)
-   nbblib.main(sys.argv)
+   import nbblib.main
+   nbblib.main.main(sys.argv)
 
 # vim: syntax=python
 # Local Variables:

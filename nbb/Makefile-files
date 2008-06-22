@@ -2,17 +2,55 @@
 
 if HAVE_PYTHON
 
+nodist_nbblib_PYTHON += nbb/nbblib/package.py
+CLEANFILES  += nbb/nbblib/package.py
+
+nbblib_PYTHON += nbb/nbblib/__init__.py
+nbblib_PYTHON += nbb/nbblib/bs.py
+nbblib_PYTHON += nbb/nbblib/commands.py
+nbblib_PYTHON += nbb/nbblib/main.py
+nbblib_PYTHON += nbb/nbblib/plugins.py
+nbblib_PYTHON += nbb/nbblib/progutils.py
+nbblib_PYTHON += nbb/nbblib/vcs.py
+
+# Put all python source files, whether changed or verbatim,
+# into builddir, such that we can run tests in builddir.
+all-local: all-local-nbblib
+all-local-nbblib:
+	@for f in $(nbblib_PYTHON); do \
+		if test -f "$(top_builddir)/$$f" && test "$(top_srcdir)/$$f" -ot "$(top_builddir)/$$f"; then :; else \
+			echo "INFO: Updating $$f in $(top_builddir) from $(top_srcdir)"; \
+			cp -f "$(top_srcdir)/$$f" "$(top_builddir)/$$f"; \
+		fi; \
+	done
+
 bin_SCRIPTS += nbb/nbb
-EXTRA_DIST  += nbb/nbb.in
 CLEANFILES  += nbb/nbb
 
-nodist_nbblib_PYTHON += nbb/nbblib/__init__.py
-CLEANFILES  += nbb/nbblib/__init__.py
-
-nbb/nbb: nbb/nbblib/__init__.py
+# We cannot create nbb/nbb from nbb/nbb.in in configure.ac/config.status.
+# pythondir is defined as ${something}foobar, and that needs expansion.
+EXTRA_DIST += nbb/nbb.in
+nbb/nbb: nbb/nbb.in $(nodist_nbblib_PYTHON) $(nbblib_PYTHON) Makefile
+	sed \
+		-e 's&[@]pythondir@&$(pythondir)&g' \
+		-e 's&[@]PYTHON@&$(PYTHON)&g' \
+		-e 's&[@]PACKAGE_VERSION@&$(PACKAGE_VERSION)&g' \
+		< $(srcdir)/nbb/nbb.in > nbb/nbb.new
+	@if test "x$$(grep '@[a-zA-Z0-9_]\{1,\}@' nbb/nbb.new)" = "x"; then :; \
+	else \
+		echo "FATAL: Unsubstituted markers remain in nbb/nbb.new."; \
+		grep '@[a-zA-Z0-9_]\{1,\}@' nbb/nbb.new; \
+		exit 1; \
+	fi
+	@if test -f nbb/nbb && cmp nbb/nbb.new nbb/nbb; \
+	then rm -f nbb/nbb.new; \
+	else mv -f nbb/nbb.new nbb/nbb; echo "INFO: Updating nbb/nbb"; fi
+	@chmod +x nbb/nbb
 
 endif
 
-CLEANFILES += nbb/nbblib/__init__.pyc
+clean-local: clean-local-nbblib
+clean-local-nbblib:
+	rm -f nbb/nbblib/*.pyc
 
 # End of Makefile-files.

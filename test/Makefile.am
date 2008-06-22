@@ -30,11 +30,15 @@ git-version-check:
 	cd $(top_builddir) && $(MAKE) git-version-check
 
 check-local: git-version-check atconfig atlocal $(srcdir)/$(TESTSUITE)
-	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH=`cd $(top_builddir) > /dev/null && pwd`:`cd $(top_builddir)/nbb > /dev/null && pwd` \
+	abs_top_builddir="$$(cd "$(top_builddir)" > /dev/null 2>&1 && pwd)"; \
+	abs_top_srcdir="$$(cd "$(top_srcdir)" > /dev/null 2>&1 && pwd)"; \
+	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH=`cd $(top_builddir)/nbb > /dev/null && pwd` \
+		PYTHONPATH="$${abs_top_builddir}/nbb" \
 		$(TESTSUITEFLAGS)
 
 installcheck-local: atconfig atlocal $(srcdir)/$(TESTSUITE)
 	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH='$(bindir)' \
+		PYTHONPATH="$(DESTDIR)$(pythondir)" \
 		$(TESTSUITEFLAGS)
 
 clean-local:

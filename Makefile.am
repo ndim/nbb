@@ -33,11 +33,6 @@ include build-helpers/package-version.mk
 include Makefile-files
 include nbb/Makefile-files
 
-if HAVE_PYTHON
-PYTHONPATH = $(DESTDIR)$(pythondir)
-export PYTHONPATH
-endif
-
 if HAVE_NDIM_MAN2TXT
 .man.txt:
 	$(NDIM_MAN2TXT) "$<" > "$@.new"
