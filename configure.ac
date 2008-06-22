@@ -20,7 +20,8 @@ AC_PROG_INSTALL
 
 ########################################################################
 
-AM_PATH_PYTHON([2.4], [:], [:])
+AM_PATH_PYTHON([2.4], [:],
+               [AC_MSG_ERROR([nbb does require Python >= 2.4])])
 AM_CONDITIONAL([HAVE_PYTHON], [ test "x$PYTHON" != "x:" ])
 
 ########################################################################
