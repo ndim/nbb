@@ -32,7 +32,7 @@ NDIM_DETECT_MAN2TXT()dnl
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([GNUmakefile])
-AC_CONFIG_FILES([nbb/nbblib.py:nbb/nbblib.in])
+AC_CONFIG_FILES([nbb/nbblib/__init__.py:nbb/nbblib/__init__.in])
 AC_CONFIG_FILES([nbb/nbb:nbb/nbb.in], [chmod +x nbb/nbb])
 AC_CONFIG_FILES([test/atlocal])
 AC_CONFIG_FILES([test/Makefile])

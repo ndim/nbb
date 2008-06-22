@@ -1,8 +1,12 @@
+nbblibdir = $(pythondir)/nbblib
+
 CLEANFILES =
 BUILT_SOURCES =
 EXTRA_DIST =
-man1_MANS =
 UPLOAD_FILES =
+TESTS =
+
+man1_MANS =
 doc_DATA =
 dist_doc_DATA =
 bin_PROGRAMS =
@@ -11,7 +15,8 @@ bin_SCRIPTS =
 check_SCRIPTS =
 python_PYTHON =
 nodist_python_PYTHON =
-TESTS =
+nodist_nbblib_PYTHON =
+nbblib_PYTHON =
 AM_INSTALLCHECK_STD_OPTIONS_EXEMPT =
 
 # For the test cases
