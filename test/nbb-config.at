@@ -1,0 +1,74 @@
+dnl ===================================================================
+
+AT_COPYRIGHT([Copyright (C) 2008 Hans Ulrich Niedermann])
+AT_TESTED([nbb])
+
+dnl ===================================================================
+
+AT_SETUP([nbb: git config defaults])
+AT_KEYWORDS([nbb git config])
+AT_CHECK([mkdir test.git && cd test.git])
+AT_CHECK([cd test.git && git init], [0],
+[Initialized empty Git repository in .git/
+])
+AT_DATA([test.git/configure.ac], [dnl
+AC[_]INIT(nbb-test, 1.2.3, invalid@invalid.invalid)
+AC[_]OUTPUT
+])
+AT_CHECK([echo "$PWD/test.git" > expout
+cd test.git && nbb config srcdir], [0], [expout])
+AT_CHECK([echo "$PWD/test.git/_build/master" > expout
+cd test.git && nbb config builddir], [0], [expout])
+AT_CHECK([echo "$PWD/test.git/_install/master" > expout
+cd test.git && nbb config installdir], [0], [expout])
+AT_CHECK([rm -rf test.git])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb: git config set/get])
+AT_KEYWORDS([nbb git config])
+AT_CHECK([mkdir test.git && cd test.git])
+AT_CHECK([cd test.git && git init], [0],
+[Initialized empty Git repository in .git/
+])
+AT_DATA([test.git/configure.ac], [dnl
+AC[_]INIT(nbb-test, 1.2.3, invalid@invalid.invalid)
+AC[_]OUTPUT
+])
+AT_CHECK([echo "$PWD/test.git" > expout
+cd test.git && nbb config srcdir], [0], [expout])
+AT_CHECK([echo "$PWD/test.git/_build/master" > expout
+cd test.git && nbb config builddir], [0], [expout])
+AT_CHECK([cd test.git && nbb config builddir _foo])
+AT_CHECK([echo "$PWD/test.git/_foo/master" > expout
+cd test.git && nbb config builddir], [0], [expout])
+AT_CHECK([cd test.git && nbb config builddir _bar])
+AT_CHECK([echo "$PWD/test.git/_bar/master" > expout
+cd test.git && nbb config builddir], [0], [expout])
+dnl TBD: --unset or something similar to reset to defaults
+AT_CHECK([rm -rf test.git])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+dnl AT_SETUP([nbb: bzr config defaults])
+dnl AT_KEYWORDS([nbb bzr config])
+dnl AT_CHECK([mkdir test.bzr && cd test.bzr])
+dnl AT_CHECK([cd test.bzr && bzr init])
+dnl echo "$PWD/test.bzr" > expout
+dnl AT_CHECK([cd test.bzr && nbb config srcdir], [0], [expout])
+dnl echo "$PWD/test.bzr/_build" > expout
+dnl AT_CHECK([cd test.bzr && nbb config builddir], [0], [expout])
+dnl echo "$PWD/test.bzr/_install" > expout
+dnl AT_CHECK([cd test.bzr && nbb config installdir], [0], [expout])
+dnl AT_CHECK([rm -rf test.git])
+dnl AT_CLEANUP()
+
+dnl ===================================================================
+
+dnl ===================================================================
+
+dnl ===================================================================
+
+

@@ -80,6 +80,8 @@ import urlparse
 # Used to make sure nbb_lib and nbb fit together
 PACKAGE_VERSION = "@PACKAGE_VERSION@"
 
+GIT_CONFIG_PREFIX = 'nbb'
+
 
 ########################################################################
 # Utility functions
@@ -109,6 +111,15 @@ def prog_stdout(call_list):
                          stderr=subprocess.PIPE)
     stdout, stderr = p.communicate(input=None)
     return stdout.strip()
+
+
+def prog_retstd(call_list):
+    """Run program and return stdout (similar to shell backticks)"""
+    p = subprocess.Popen(call_list,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate(input=None)
+    return (p.returncode, stdout.strip(), stderr.strip())
 
 
 class ProgramRunError(Exception):
@@ -144,6 +155,7 @@ class AbstractConfig(object):
     """Return static config until we implement real config reading"""
 
     def __init__(self, srcdir, nick):
+        super(AbstractConfig, self).__init__()
         self._srcdir = srcdir
         self._nick = nick
 
@@ -162,6 +174,7 @@ class AbstractConfig(object):
 
 class CommandLineError(Exception):
     def __init__(self, message, *args):
+        super(CommandLineError, self).__init__()
         if args:
             self.msg = message % args
         else:
@@ -266,21 +279,15 @@ class VCSourceTree(object):
         if len(VCSourceTree.plugins) < 1:
             raise "No VC source tree classes registered"
         matches = PluginDict()
-        print "VCSourceTree.detect", VCSourceTree.plugins
-        print "srcdir", srcdir
         for key, klass in VCSourceTree.plugins.items():
-            print "key", key
-            print "klass", klass
             try:
                 matches[key] = klass(srcdir, context)
-                print "MATCH:", srcdir
             except NotAVCSourceTree, e:
                 pass
         if len(matches) > 1:
             raise AmbigousAVCSource(srcdir, str(matches.values()))
         elif len(matches) < 1:
             raise NotAVCSourceTree(srcdir)
-        print "Matches:", matches
         return matches[matches.keys()[0]]
 
     def get_config(self):
@@ -399,6 +406,46 @@ class HelpCommand(Command):
         else:
             assert(False)
 
+
+class GitConfig(AbstractConfig):
+    """"""
+
+    def __init__(self, *args, **kwargs):
+        super(GitConfig, self).__init__(*args, **kwargs)
+
+    def _itemname(self, item): return '.'.join((GIT_CONFIG_PREFIX, item, ))
+    def _myreldir(self, rdir):
+        return os.path.join(self._srcdir, rdir, self._nick)
+
+    def get_builddir(self):
+        ret, stdout, stderr = prog_retstd(['git', 'config', self._itemname('builddir')])
+        assert(stderr == "")
+	if ret == 0 and stdout:
+            return self._myreldir(stdout)
+        else:
+            return super(GitConfig, self).get_builddir()
+
+    def set_builddir(self, value):
+        ret, stdout, stderr = prog_retstd(['git', 'config', self._itemname('builddir'), value])
+        assert(ret == 0 and stdout == "" and stderr == "")
+
+    builddir = property(get_builddir, set_builddir)
+
+    def get_installdir(self):
+        ret, stdout, stderr = prog_retstd(['git', 'config', self._itemname('installdir')])
+        assert(stderr == "")
+	if ret == 0 and stdout:
+            return self._myreldir(stdout)
+        else:
+            return super(GitConfig, self).get_installdir()
+
+    def set_installdir(self, value):
+        ret, stdout, stderr = prog_retstd(['git', 'config', self._itemname('installdir'), value])
+        assert(ret == 0 and stdout == "" and stderr == "")
+
+    installdir = property(get_installdir, set_installdir)
+
+
 class InternalConfigCommand(Command):
     name = 'internal-config'
     summary = 'print internal program configuration'
@@ -416,15 +463,17 @@ class SourceClassCommand(Command):
         srcdir = os.getcwd()
         absdir = os.path.abspath(srcdir)
         self.vcs_sourcetree = VCSourceTree.detect(absdir, context)
-        print "vcs_sourcetree", str(self.vcs_sourcetree)
+        if context.verbose:
+            print "vcs_sourcetree", str(self.vcs_sourcetree)
         assert(self.vcs_sourcetree)
         cfg = self.vcs_sourcetree.config
         self.bs_sourcetree = BSSourceTree.detect(self.vcs_sourcetree, context)
-        print "bs_sourcetree", str(self.bs_sourcetree)
-        print "CONFIG"
-        print " ", "srcdir", cfg.srcdir
-        print " ", "builddir", cfg.builddir
-        print " ", "installdir", cfg.installdir
+        if context.verbose:
+            print "bs_sourcetree", str(self.bs_sourcetree)
+            print "CONFIG", cfg
+            print " ", "srcdir", cfg.srcdir
+            print " ", "builddir", cfg.builddir
+            print " ", "installdir", cfg.installdir
 
 
 class BuildTestCommand(SourceClassCommand):
@@ -435,6 +484,45 @@ class BuildTestCommand(SourceClassCommand):
         self.bs_sourcetree.configure()
         self.bs_sourcetree.build()
         self.bs_sourcetree.install()
+
+
+class ConfigCommand(SourceClassCommand):
+    name = 'config'
+    summary = 'set/get config values'
+    usage = '(srcdir|builddir|installdir)'
+
+    def validate_args(self, *args, **kwargs):
+        items = ('srcdir', 'builddir', 'installdir', )
+        if len(args) == 0:
+            raise CommandLineError("'%s' requires at least one parameter (%s)", self.name,
+                                   ', '.join(items))
+        elif len(args) == 1 and args[0] in items:
+            pass
+        elif len(args) == 2 and args[0] in items:
+            if args[0] in ('srcdir', ):
+                raise CommandLineError("'%s' command cannot change 'srcdir'", self.name)
+            else:
+                pass
+        else:
+            raise CommandLineError("'%s' requires less or different parameters", self.name)
+
+    def run(self):
+        git_get_items = ('builddir', 'installdir', 'srcdir')
+        git_set_items = ('builddir', 'installdir', )
+        if len(self.args) == 1:
+            if self.args[0] in git_get_items:
+                print getattr(self.vcs_sourcetree.config, self.args[0])
+            else:
+                assert(False)
+        elif len(self.args) == 2:
+            if self.args[0] == 'builddir':
+                self.vcs_sourcetree.config.builddir = self.args[1]
+            elif self.args[0] == 'installdir':
+                self.vcs_sourcetree.config.installdir = self.args[1]
+            else:
+                assert(False)
+        else:
+            assert(False)
 
 
 ########################################################################
@@ -455,6 +543,10 @@ class GitSourceTree(VCSourceTree):
         if reldir:
             os.chdir(reldir)
         self.__tree_root = os.getcwd()
+
+    def get_config(self):
+        return GitConfig(self.tree_root(), self.branch_name())
+    config = property(get_config)
 
     def tree_root(self):
         return self.__tree_root
@@ -529,8 +621,7 @@ class BSSourceTree(object):
             raise ("More than one source tree BS type detected for '%s': %s"
                    % (vcs_tree, ", ".join(map(lambda x:str(x), matches))))
         elif len(matches) < 1:
-            raise "Source tree type for '%s' not detected" % (vcs_tree,)
-        print "Matches:", matches
+            raise "Source tree build system type for '%s' not detected" % (vcs_tree,)
         return matches[matches.keys()[0]]
 
     def __str__(self):
@@ -661,17 +752,22 @@ class BSProperty(Property):
         return (value in BSSourceTree.plugins.keys())
 
 
-class DryRunProperty(Property):
-    def __init__(self):
-        super(DryRunProperty, self).__init__(default=False)
+class BoolProperty(Property):
+    def __init__(self, default=False):
+        super(BoolProperty, self).__init__(default=default)
     def isvalid(self, value):
         return (value in (True, False))
+
+class DryRunProperty(BoolProperty):
+    def __init__(self):
+        super(DryRunProperty, self).__init__(default=False)
 
 
 class Context(object):
     vcs = VCSProperty()
     bs = BSProperty()
     dry_run = DryRunProperty()
+    verbose = BoolProperty()
 
 def main(argv):
 
@@ -685,7 +781,6 @@ def main(argv):
         print "Fatal: %(prog)s requires some arguments" % outdict
         return 2
 
-    verbosity = 0
     i = 1
     ctx = Context()
     while i<len(argv):
@@ -712,9 +807,7 @@ def main(argv):
         elif argv[i][:6] == '--vcs=':
             ctx.vcs = argv[i][6:]
         elif argv[i] in ('--verbose', ):
-            verbosity = verbosity + 1
-        elif argv[i] in ('--quiet', ):
-            verbosity = verbosity - 1
+            ctx.verbose = True
         # print "", i, argv[i]
         i = i + 1
     cmd = argv[i]

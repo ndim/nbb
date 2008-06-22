@@ -6,6 +6,7 @@ DISTCLEANFILES =
 TESTCASES =
 TESTCASES += autotest.at
 TESTCASES += nbb-basic.at
+TESTCASES += nbb-config.at
 # Add more testcases here
 
 EXTRA_DIST += $(TESTCASES)
