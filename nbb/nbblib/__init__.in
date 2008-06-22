@@ -142,15 +142,22 @@ def prog_run(call_list, context):
 
 class AbstractConfig(object):
     """Return static config until we implement real config reading"""
+
     def __init__(self, srcdir, nick):
-        self.srcdir = srcdir
-        self.nick = nick
-    def srcdir(self):
-        return os.path.join(self.srcdir)
-    def builddir(self):
-        return os.path.join(self.srcdir, "_build", self.nick)
-    def installdir(self):
-        return os.path.join(self.srcdir, "_install", self.nick)
+        self._srcdir = srcdir
+        self._nick = nick
+
+    def get_srcdir(self):
+        return os.path.join(self._srcdir)
+    srcdir = property(get_srcdir)
+
+    def get_builddir(self):
+        return os.path.join(self._srcdir, "_build", self._nick)
+    builddir = property(get_builddir)
+
+    def get_installdir(self):
+        return os.path.join(self._srcdir, "_install", self._nick)
+    installdir = property(get_installdir)
 
 
 class CommandLineError(Exception):
@@ -279,6 +286,7 @@ class VCSourceTree(object):
     def get_config(self):
         """Get configuration object which determines builddir etc"""
         return AbstractConfig(self.tree_root(), self.branch_name())
+    config = property(get_config)
 
     def tree_root(self):
         """Get absolute path to source tree root"""
@@ -410,8 +418,13 @@ class SourceClassCommand(Command):
         self.vcs_sourcetree = VCSourceTree.detect(absdir, context)
         print "vcs_sourcetree", str(self.vcs_sourcetree)
         assert(self.vcs_sourcetree)
+        cfg = self.vcs_sourcetree.config
         self.bs_sourcetree = BSSourceTree.detect(self.vcs_sourcetree, context)
         print "bs_sourcetree", str(self.bs_sourcetree)
+        print "CONFIG"
+        print " ", "srcdir", cfg.srcdir
+        print " ", "builddir", cfg.builddir
+        print " ", "installdir", cfg.installdir
 
 
 class BuildTestCommand(SourceClassCommand):
@@ -537,7 +550,7 @@ class AutomakeSourceTree(BSSourceTree):
     def __init__(self, vcs_tree, context):
         super(AutomakeSourceTree, self).__init__(context)
         srcdir = vcs_tree.tree_root()
-        self.config = vcs_tree.get_config()
+        self.config = vcs_tree.config
         flag = False
         for f in [ os.path.join(srcdir, 'configure.ac'),
                    os.path.join(srcdir, 'configure.in'),
@@ -547,32 +560,31 @@ class AutomakeSourceTree(BSSourceTree):
                 break
         if not flag:
             raise NotABSSourceTree()
-        self.srcdir = srcdir
 
     def tree_root(self):
-        return self.srcdir
+        return self.config.srcdir
 
     def init(self):
         """'autoreconf'"""
-        prog_run(["autoreconf", "-v", "-i", "-s", self.srcdir], self.context)
+        prog_run(["autoreconf", "-v", "-i", "-s", self.config.srcdir], self.context)
 
     def configure(self):
         """'configure --prefix'"""
-        builddir = self.config.builddir()
+        builddir = self.config.builddir
         if not os.path.exists(builddir): os.makedirs(builddir)
         os.chdir(builddir)
-        prog_run(["%s/configure" % self.srcdir,
-                  "--prefix=%s" % self.config.installdir()
+        prog_run(["%s/configure" % self.config.srcdir,
+                  "--prefix=%s" % self.config.installdir
                   ], self.context)
 
     def build(self):
         """'make'"""
-        os.chdir(self.config.builddir())
+        os.chdir(self.config.builddir)
         prog_run(["make", ], self.context)
 
     def install(self):
         """'make install'"""
-        os.chdir(self.config.builddir())
+        os.chdir(self.config.builddir)
         prog_run(["make", "install", "INSTALL=/usr/bin/install -p"], self.context)
 
 
