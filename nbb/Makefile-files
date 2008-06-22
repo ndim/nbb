@@ -31,15 +31,15 @@ CLEANFILES  += nbb/nbb
 # pythondir is defined as ${something}foobar, and that needs expansion.
 EXTRA_DIST += nbb/nbb.in
 nbb/nbb: nbb/nbb.in $(nodist_nbblib_PYTHON) $(nbblib_PYTHON) Makefile
-	sed \
+	$(SED) \
 		-e 's&[@]pythondir@&$(pythondir)&g' \
 		-e 's&[@]PYTHON@&$(PYTHON)&g' \
 		-e 's&[@]PACKAGE_VERSION@&$(PACKAGE_VERSION)&g' \
 		< $(srcdir)/nbb/nbb.in > nbb/nbb.new
-	@if test "x$$(grep '@[a-zA-Z0-9_]\{1,\}@' nbb/nbb.new)" = "x"; then :; \
+	@if test "x$$($(GREP) '@[a-zA-Z0-9_]\{1,\}@' nbb/nbb.new)" = "x"; then :; \
 	else \
 		echo "FATAL: Unsubstituted markers remain in nbb/nbb.new."; \
-		grep '@[a-zA-Z0-9_]\{1,\}@' nbb/nbb.new; \
+		$(GREP) '@[a-zA-Z0-9_]\{1,\}@' nbb/nbb.new; \
 		exit 1; \
 	fi
 	@if test -f nbb/nbb && cmp nbb/nbb.new nbb/nbb; \
