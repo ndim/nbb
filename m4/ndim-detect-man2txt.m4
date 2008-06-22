@@ -1,4 +1,4 @@
-# serial 1.6.4
+# serial 1.14
 dnl
 dnl NDIM_DETECT_MAN2TXT
 dnl

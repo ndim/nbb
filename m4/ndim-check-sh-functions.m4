@@ -1,7 +1,6 @@
-# version 1.12
+# version 1.13
 dnl NDIM_CHECK_SH_FUNCTIONS([ACTION-IF-SUPPORTED],
 dnl                         [ACTION-IF-NOT-SUPPORTED)dnl
-dnl
 m4_pattern_forbid([NDIM_CHECK_SH_FUNCTIONS])dnl
 AC_DEFUN([NDIM_CHECK_SH_FUNCTIONS],[dnl
 NDIM_CHECK_SH_COMMAND_SUBSTITUTION([], [dnl

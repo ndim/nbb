@@ -1,7 +1,6 @@
-# serial 1.2.3
+# serial 1.14
 dnl NDIM_CHECK_SH_COMMAND_SUBSTITUTION([ACTION-IF-SUPPORTED],
-dnl                                    [ACTION-IF-NOT-SUPPORTED)dnl
-dnl
+dnl                                    [ACTION-IF-NOT-SUPPORTED])dnl
 m4_pattern_forbid([NDIM_CHECK_SH_COMMAND_SUBSTITUTION])dnl
 AC_DEFUN([NDIM_CHECK_SH_COMMAND_SUBSTITUTION],[dnl
 AS_IF([test "x$ndim_sh_command_substitution" = "x"], [dnl

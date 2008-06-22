@@ -1,8 +1,6 @@
-# version 1.12
-dnl NDIM_CHECK_SH_COMMAND_EXPANSION([ACTION-IF-SUPPORTED],
-dnl                                 [ACTION-IF-NOT-SUPPORTED)dnl
-dnl
-m4_pattern_forbid([NDIM_CHECK_SH_PARAM_SUBSTITUTION])dnl
+# version 1.14
+dnl NDIM_CHECK_SH_PARAM_EXPANSION([ACTION-IF-SUPPORTED],
+dnl                               [ACTION-IF-NOT-SUPPORTED])dnl
 m4_pattern_forbid([NDIM_CHECK_SH_PARAM_EXPANSION])dnl
 AC_DEFUN([NDIM_CHECK_SH_PARAM_EXPANSION],[dnl
 AS_IF([test "x$ndim_sh_param_expansion" = "x"], [dnl
