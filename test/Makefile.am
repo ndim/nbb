@@ -32,8 +32,8 @@ git-version-check:
 check-local: git-version-check atconfig atlocal $(srcdir)/$(TESTSUITE)
 	abs_top_builddir="$$(cd "$(top_builddir)" > /dev/null 2>&1 && pwd)"; \
 	abs_top_srcdir="$$(cd "$(top_srcdir)" > /dev/null 2>&1 && pwd)"; \
-	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH=`cd $(top_builddir)/nbb > /dev/null && pwd` \
-		PYTHONPATH="$${abs_top_builddir}/nbb" \
+	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH=`cd $(top_builddir)/src > /dev/null && pwd` \
+		PYTHONPATH="$${abs_top_builddir}/src" \
 		$(TESTSUITEFLAGS)
 
 installcheck-local: atconfig atlocal $(srcdir)/$(TESTSUITE)

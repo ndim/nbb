@@ -31,7 +31,7 @@ SUBDIRS = . test
 include build-helpers/package-version.mk
 
 include Makefile-files
-include nbb/Makefile-files
+include src/Makefile-files
 
 if HAVE_NDIM_MAN2TXT
 .man.txt:

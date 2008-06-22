@@ -2,16 +2,16 @@
 
 if HAVE_PYTHON
 
-nodist_nbblib_PYTHON += nbb/nbblib/package.py
-CLEANFILES  += nbb/nbblib/package.py
+nodist_nbblib_PYTHON += src/nbblib/package.py
+CLEANFILES  += src/nbblib/package.py
 
-nbblib_PYTHON += nbb/nbblib/__init__.py
-nbblib_PYTHON += nbb/nbblib/bs.py
-nbblib_PYTHON += nbb/nbblib/commands.py
-nbblib_PYTHON += nbb/nbblib/main.py
-nbblib_PYTHON += nbb/nbblib/plugins.py
-nbblib_PYTHON += nbb/nbblib/progutils.py
-nbblib_PYTHON += nbb/nbblib/vcs.py
+nbblib_PYTHON += src/nbblib/__init__.py
+nbblib_PYTHON += src/nbblib/bs.py
+nbblib_PYTHON += src/nbblib/commands.py
+nbblib_PYTHON += src/nbblib/main.py
+nbblib_PYTHON += src/nbblib/plugins.py
+nbblib_PYTHON += src/nbblib/progutils.py
+nbblib_PYTHON += src/nbblib/vcs.py
 
 # Put all python source files, whether changed or verbatim,
 # into builddir, such that we can run tests in builddir.
@@ -24,34 +24,34 @@ all-local-nbblib:
 		fi; \
 	done
 
-bin_SCRIPTS += nbb/nbb
-CLEANFILES  += nbb/nbb
+bin_SCRIPTS += src/nbb
+CLEANFILES  += src/nbb
 
-# We cannot create nbb/nbb from nbb/nbb.in in configure.ac/config.status.
+# We cannot create src/nbb from src/nbb.in in configure.ac/config.status.
 # pythondir is defined as ${something}foobar, and that needs expansion.
-EXTRA_DIST += nbb/nbb.in
-nbb/nbb: nbb/nbb.in $(nodist_nbblib_PYTHON) $(nbblib_PYTHON) Makefile
+EXTRA_DIST += src/nbb.in
+src/nbb: src/nbb.in $(nodist_nbblib_PYTHON) $(nbblib_PYTHON) Makefile
 	$(SED) \
 		-e 's&[@]pythondir@&$(pythondir)&g' \
 		-e 's&[@]PYTHON@&$(PYTHON)&g' \
 		-e 's&[@]PACKAGE_VERSION@&$(PACKAGE_VERSION)&g' \
-		< $(srcdir)/nbb/nbb.in > nbb/nbb.new
-	@if test "x$$($(GREP) '@[a-zA-Z0-9_]\{1,\}@' nbb/nbb.new)" = "x"; then :; \
+		< $(srcdir)/src/nbb.in > src/nbb.new
+	@if test "x$$($(GREP) '@[a-zA-Z0-9_]\{1,\}@' src/nbb.new)" = "x"; then :; \
 	else \
-		echo "FATAL: Unsubstituted markers remain in nbb/nbb.new."; \
-		$(GREP) '@[a-zA-Z0-9_]\{1,\}@' nbb/nbb.new; \
+		echo "FATAL: Unsubstituted markers remain in src/nbb.new."; \
+		$(GREP) '@[a-zA-Z0-9_]\{1,\}@' src/nbb.new; \
 		exit 1; \
 	fi
-	@if test -f nbb/nbb && cmp nbb/nbb.new nbb/nbb; \
-	then rm -f nbb/nbb.new; \
-	else mv -f nbb/nbb.new nbb/nbb; echo "INFO: Updating nbb/nbb"; fi
-	@chmod +x nbb/nbb
+	@if test -f src/nbb && cmp src/nbb.new src/nbb; \
+	then rm -f src/nbb.new; \
+	else mv -f src/nbb.new src/nbb; echo "INFO: Updating src/nbb"; fi
+	@chmod +x src/nbb
 
 endif
 
 clean-local: clean-local-nbblib
 clean-local-nbblib:
-	rm -f nbb/nbblib/*.pyc
+	rm -f src/nbblib/*.pyc
 	@top_srcdir="$$(cd "$(top_srcdir)" > /dev/null 2>&1 && pwd)"; \
 	top_builddir="$$(cd "$(top_builddir)" > /dev/null 2>&1 && pwd)"; \
 	if test "x$${top_srcdir}" = "x$${top_builddir}"; then :; else \
