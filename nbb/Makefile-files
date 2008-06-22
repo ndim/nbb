@@ -6,15 +6,15 @@ bin_SCRIPTS += nbb/nbb
 EXTRA_DIST  += nbb/nbb.in
 CLEANFILES  += nbb/nbb
 
-nodist_python_PYTHON += nbb/nbb_lib.py
-CLEANFILES  += nbb/nbb_lib.py
+nodist_python_PYTHON += nbb/nbblib.py
+CLEANFILES  += nbb/nbblib.py
 
-nbb/nbb: nbb/nbb_lib.py
+nbb/nbb: nbb/nbblib.py
 #nbb/nbb_lib.py: $(top_builddir)/config.status
 #nbb/nbb: $(top_builddir)/config.status
 
 endif
 
-CLEANFILES += nbb/nbb_lib.pyc
+CLEANFILES += nbb/nbblib.pyc
 
 # End of Makefile-files.

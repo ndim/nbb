@@ -1,5 +1,6 @@
 nbb 1.20.x
   * Implement 'nbb help <command>'.
+  * Rename python module from nbb_lib to nbblib.
 
 nbb 1.20
   * Initial standalone version of nbb.

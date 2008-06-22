@@ -19,19 +19,19 @@ if __name__ == '__main__':
       if cond:
          sys.path = path
          try:
-            import nbb_lib
+            import nbblib
             lib_found = True
             break
          except ImportError, e:
             pass
    if not lib_found:
-      sys.stderr.write("nbb: Fatal: Could not load nbb_lib.\n")
+      sys.stderr.write("nbb: Fatal: Could not load nbblib.\n")
       sys.exit(3)
    #sys.stdout.write("sys.path=%s\n" % repr(sys.path))
    #sys.stdout.flush()
    PACKAGE_VERSION = "@PACKAGE_VERSION@"
-   assert(nbb_lib.PACKAGE_VERSION == PACKAGE_VERSION)
-   nbb_lib.main(sys.argv)
+   assert(nbblib.PACKAGE_VERSION == PACKAGE_VERSION)
+   nbblib.main(sys.argv)
 
 # vim: syntax=python
 # Local Variables:
