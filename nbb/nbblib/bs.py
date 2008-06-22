@@ -5,6 +5,7 @@
 
 import os
 from nbblib.plugins import *
+from nbblib.progutils import *
 
 
 class NotABSSourceTree(Exception):
@@ -95,6 +96,8 @@ class AutomakeSourceTree(BSSourceTree):
         """'configure --prefix'"""
         builddir = self.config.builddir
         if not os.path.exists(builddir): os.makedirs(builddir)
+        if not os.path.exists(os.path.join(builddir, 'configure')):
+            self.init
         os.chdir(builddir)
         prog_run(["%s/configure" % self.config.srcdir,
                   "--prefix=%s" % self.config.installdir
@@ -102,11 +105,15 @@ class AutomakeSourceTree(BSSourceTree):
 
     def build(self):
         """'make'"""
+        if not os.path.exists(os.path.join(self.config.builddir, 'config.status')):
+            self.configure()
         os.chdir(self.config.builddir)
         prog_run(["make", ], self.context)
 
     def install(self):
         """'make install'"""
+        if not os.path.exists(os.path.join(self.config.builddir, 'config.status')):
+            self.configure()
         os.chdir(self.config.builddir)
         prog_run(["make", "install", "INSTALL=/usr/bin/install -p"], self.context)
 

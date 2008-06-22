@@ -1,4 +1,5 @@
 import os
+import sys
 
 from nbblib.package import *
 from nbblib.plugins import *
@@ -170,6 +171,42 @@ class BuildTestCommand(SourceClassCommand):
         self.bs_sourcetree.configure()
         self.bs_sourcetree.build()
         self.bs_sourcetree.install()
+
+
+class InitCommand(SourceClassCommand):
+    name = 'init'
+    summary = 'initialize buildsystem'
+    def run(self):
+        self.bs_sourcetree.init()
+
+class ConfigureCommand(SourceClassCommand):
+    name = 'configure'
+    summary = 'configure buildsystem'
+    def run(self):
+        self.bs_sourcetree.configure()
+
+class BuildCommand(SourceClassCommand):
+    name = 'build'
+    summary = 'build from source'
+    def run(self):
+        self.bs_sourcetree.build()
+
+class InstallCommand(SourceClassCommand):
+    name = 'install'
+    summary = 'install the built things'
+    def run(self):
+        self.bs_sourcetree.install()
+
+
+class MakeCommand(SourceClassCommand):
+    name = 'make'
+    summary = 'run make in builddir'
+    def validate_args(self, *args, **kwargs):
+        pass
+    def run(self):
+        os.chdir(self.bs_sourcetree.config.builddir)
+        prog_run(["make"] + list(self.args),
+                 self.context)
 
 
 class ConfigCommand(SourceClassCommand):

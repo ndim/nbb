@@ -1,10 +1,16 @@
 nbb 1.20.x
   * Automatically call autoreconf for GNU make users.
-  * Implement 'nbb help <command>'.
+  * Implement new command 'nbb help <command>'.
   * Implement global nbb options --vcs, --build-system, --dry-run.
-  * Implement 'nbb config <option> [<new-value>]'.
-  * Rename python module from nbb_lib.py to nbblib/__init__.py.
+  * Implement new command 'nbb config <option> [<new-value>]'.
+  * Implement new command 'nbb init'
+  * Implement new command 'nbb configure'
+  * Implement new command 'nbb build'
+  * Implement new command 'nbb install'
+  * Implement new command 'nbb make [...params...]'
+  * Refactor python module nbb_lib.py into nbblib/*.py
   * Miscellaneous build fixes related to move to standalone nbb.
+  * Handle a few more corner cases with nested source trees.
 
 nbb 1.20
   * Initial standalone version of nbb.
