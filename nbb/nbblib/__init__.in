@@ -1,5 +1,5 @@
 """\
-nbb (ndim's branch builder) @PACKAGE_VERSION@
+nbb (ndim's branch builder) %(PACKAGE_VERSION)s
 Build, install given branch of source code into a branch specific place
 Copyright (C) 2007, 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
 License conditions TBA
@@ -739,7 +739,7 @@ class NBB_Command(object):
 outdict = {}
 outdict['vcssystems']   = ", ".join(VCSourceTree.plugins.keys())
 outdict['buildsystems'] = ", ".join(BSSourceTree.plugins.keys())
-
+outdict['PACKAGE_VERSION'] = PACKAGE_VERSION
 
 def print_help():
     print __doc__ % outdict,
@@ -820,7 +820,7 @@ def main(argv):
             print_help()
             return
         elif argv[i] in ('-V', '--version'):
-            print "%(prog)s (ndim's branch builder) @PACKAGE_VERSION@" % outdict
+            print "%(prog)s (ndim's branch builder) %(PACKAGE_VERSION)s" % outdict
             return
         elif argv[i] in ('-n', '--dry-run'):
             ctx.dry_run = True
