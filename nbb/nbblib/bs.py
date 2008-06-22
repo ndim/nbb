@@ -13,7 +13,8 @@ class NotABSSourceTree(Exception):
         super(NotABSSourceTree, self).__init__()
         self.vcs_tree = vcs_tree
     def __str__(self):
-        return "Source tree build system type for '%s' not detected" % (self.vcs_tree,)
+        return ("Source tree build system type for '%s' not detected"
+                % (self.vcs_tree,))
 
 
 class AmbigousBSSource(Exception):
@@ -25,7 +26,8 @@ class AmbigousBSSource(Exception):
         fmt = "  %-9s %s"
         def strmatch(m):
             return fmt % (m.name, m.tree_root())
-        alist = [fmt % ('VCS Type', 'Source tree root')] + map(strmatch, self.matches)
+        alist = [fmt % ('VCS Type', 'Source tree root')]
+        alist.extend(map(strmatch, self.matches))
         return ("More than one source tree VCS type detected for '%s':\n#%s"
                 % (self.srcdir, '\n '.join(alist)))
 
@@ -90,7 +92,8 @@ class AutomakeSourceTree(BSSourceTree):
 
     def init(self):
         """'autoreconf'"""
-        prog_run(["autoreconf", "-v", "-i", "-s", self.config.srcdir], self.context)
+        prog_run(["autoreconf", "-v", "-i", "-s", self.config.srcdir],
+                 self.context)
 
     def configure(self):
         """'configure --prefix'"""
@@ -105,16 +108,19 @@ class AutomakeSourceTree(BSSourceTree):
 
     def build(self):
         """'make'"""
-        if not os.path.exists(os.path.join(self.config.builddir, 'config.status')):
+        builddir = self.config.builddir
+        if not os.path.exists(os.path.join(builddir, 'config.status')):
             self.configure()
-        os.chdir(self.config.builddir)
+        os.chdir(builddir)
         prog_run(["make", ], self.context)
 
     def install(self):
         """'make install'"""
-        if not os.path.exists(os.path.join(self.config.builddir, 'config.status')):
+        builddir = self.config.builddir
+        if not os.path.exists(os.path.join(builddir, 'config.status')):
             self.configure()
-        os.chdir(self.config.builddir)
-        prog_run(["make", "install", "INSTALL=/usr/bin/install -p"], self.context)
+        os.chdir(builddir)
+        prog_run(["make", "install", "INSTALL=/usr/bin/install -p"],
+                 self.context)
 
 

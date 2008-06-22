@@ -5,8 +5,8 @@ class DuplicatePluginName(Exception):
 class PluginDict(object):
     """Helper for GenericPluginMeta class
 
-    Behaves basically like a standard dict, but fails when asked
-    to update an existing value.
+    Behaves basically like a standard dict, but will raise an exception
+    when asked to update an existing value.
     """
     def __init__(self):
         self.dict = {}
@@ -51,5 +51,4 @@ class GenericPluginMeta(type):
         else:
             # This must be an abstract subclass of plugins.
             pass
-
 

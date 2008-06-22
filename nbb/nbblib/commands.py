@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 from nbblib.package import *
 from nbblib.plugins import *
 from nbblib.progutils import *
@@ -81,8 +82,9 @@ class Command(object):
         print "Command: ", self.name
         print "*args:   ", args
         print "**kwargs:", kwargs
-	if len(args) > 0:
-            raise CommandLineError("'%s' command takes no parameters", self.name)
+        if len(args) > 0:
+            raise CommandLineError("'%s' command takes no parameters",
+                                   self.name)
 
     def __str__(self):
         return "Command(%s, %s)" % (self.cmd_name, self.cmdargs)
@@ -217,17 +219,19 @@ class ConfigCommand(SourceClassCommand):
     def validate_args(self, *args, **kwargs):
         items = ('srcdir', 'builddir', 'installdir', )
         if len(args) == 0:
-            raise CommandLineError("'%s' requires at least one parameter (%s)", self.name,
-                                   ', '.join(items))
+            raise CommandLineError("'%s' command requires at least one parameter (%s)",
+                                   self.name, ', '.join(items))
         elif len(args) == 1 and args[0] in items:
             pass
         elif len(args) == 2 and args[0] in items:
             if args[0] in ('srcdir', ):
-                raise CommandLineError("'%s' command cannot change 'srcdir'", self.name)
+                raise CommandLineError("'%s' command cannot change 'srcdir'",
+                                       self.name)
             else:
                 pass
         else:
-            raise CommandLineError("'%s' requires less or different parameters", self.name)
+            raise CommandLineError("'%s' requires less or different parameters",
+                                   self.name)
 
     def run(self):
         git_get_items = ('builddir', 'installdir', 'srcdir')
@@ -266,6 +270,5 @@ class NBB_Command(object):
                 print "Program aborted."
         else:
             print "Fatal: Unknown command '%s'" % cmd
-	    raise NotImplementedError()
-        return
+            raise NotImplementedError()
 

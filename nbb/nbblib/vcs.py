@@ -45,7 +45,8 @@ class AmbigousVCSource(Exception):
         fmt = "  %-9s %-15s %s"
         def strmatch(m):
             return fmt % (m.name, m.branch_name(), m.tree_root())
-        alist = [fmt % ('VCS Type', 'Branch Name', 'Source tree root')] + map(strmatch, self.matches)
+        alist = ([fmt % ('VCS Type', 'Branch Name', 'Source tree root')]
+                 + map(strmatch, self.matches))
         return ("More than one source tree VCS type detected for '%s':\n#%s"
                 % (self.srcdir, '\n '.join(alist)))
 

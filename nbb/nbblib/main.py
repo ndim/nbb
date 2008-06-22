@@ -7,13 +7,13 @@
 nbb (ndim's branch builder) %(PACKAGE_VERSION)s
 Build, install given branch of source code into a branch specific place
 Copyright (C) 2007, 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
-License conditions TBA
+TBA: License conditions
 
 Usage: %(prog)s <to-be-determined>
 
 Features:
- * supports git branches (TBD: git config)
- * supports bzr branches (requires useful branch nick, TBD: bzr config)
+ * supports git branches
+ * supports bzr branches (requires useful branch nick, TBD: bzr config ?)
  * does out-of-source-tree builds (in-source-tree-builds unsupported)
  * direct support for automake/autoconf based build systems
  * TBD: supports execution of user commands in source, build, install dirs
@@ -22,7 +22,7 @@ DONE:
  * VCS config support ('git config', etc.)
  * Build system support: automake/autoconf
 
-TODO:
+TODO: (Large list)
  * Build system support: cmake, scons, ...
  * Fine-tune init, configure, build, install commands with knowledge
    gained with git-amb, especially the command interdependencies.
@@ -48,7 +48,7 @@ TODO:
  * Bash syntax completion for that user interface.
  * Man page or something similar. Generate from help texts?
 
-Command line interface (TBD):
+TBD: Command line interface:
 
   Run default build commands:
     $ %(prog)s [general options] init [command specific options]
@@ -101,6 +101,10 @@ from nbblib.bs import *
 from nbblib.commands import *
 from nbblib.package import *
 from nbblib.vcs import *
+
+
+def print_version(context):
+    print "%(prog)s (ndim's branch builder) %(PACKAGE_VERSION)s" % context
 
 
 def print_help(context):
@@ -200,7 +204,7 @@ def main(argv):
             print_help(context)
             return
         elif argv[i] in ('-V', '--version'):
-            print "%(prog)s (ndim's branch builder) %(PACKAGE_VERSION)s" % context
+            print_version(context)
             return
         elif argv[i] in ('-n', '--dry-run'):
             context.dry_run = True
