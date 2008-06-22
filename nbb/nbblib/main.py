@@ -23,20 +23,27 @@ DONE:
  * Build system support: automake/autoconf
 
 TODO:
- * Build system support: cmake, ...
+ * Build system support: cmake, scons, ...
  * Fine-tune init, configure, build, install commands with knowledge
-   gained with git-amb.
+   gained with git-amb, especially the command interdependencies.
  * implement *-sh and *-run commands
+ * General removal of redundancy in Python code.
+ * More declarative syntax elements in the Python code.
+ * Use declarations for command line parsing, and help text generation.
+ * Add global --nick or similar option to determine the branch
+   name to use for composing the pathes.
+ * Store config in ${srcdir}/.nbb.conf instead of 'git config'?
+   More portable. bzr does not have a config interface, for example.
  * Design nice user interface. Requirements:
-   * print top_srcdir, builddir, installdir
+   * print top_srcdir, builddir, installdir. OK: 'config'
    * start subshell in top_srcdir, builddir, installdir
-   * run 'autoreconf' type step
-   * run 'configure' type step
-   * run 'make' type step
-   * run 'make install' type step
-   * run custom (make) commands
+   * run 'autoreconf' type step. OK: 'init'
+   * run 'configure' type step. OK: 'configure'
+   * run 'make' type step. OK: 'build'
+   * run 'make install' type step. OK: 'install'
+   * run custom (make) commands. OK: 'make'
  * Bash syntax completion for that user interface.
- * Man page or something similar.
+ * Man page or something similar. Generate from help texts?
 
 Command line interface (TBD):
 
@@ -47,7 +54,13 @@ Command line interface (TBD):
     $ %(prog)s [general options] install [command specific options]
 
   Run cleanup commands:
-    TBD
+    $ %(prog)s [general options] purge [command specific options]
+      Command specific options:
+        --builddir-only
+        --installdir-only
+    $ %(prog)s [general options] purge-all    # either this
+    $ %(prog)s [general options] purge --all  # or that
+    TBD: 'make clean', 'make distclean' and similar stuff?
 
   Get/set config:
     $ %(prog)s [general options] config srcdir
