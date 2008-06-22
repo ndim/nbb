@@ -34,6 +34,9 @@ TODO:
    name to use for composing the pathes.
  * Store config in ${srcdir}/.nbb.conf instead of 'git config'?
    More portable. bzr does not have a config interface, for example.
+ * Model different "stages" of e.g. automake builds as distinct objects,
+   including proper dependency detectors, and stuff? OK, we're not going
+   to duplicate scons here.
  * Design nice user interface. Requirements:
    * print top_srcdir, builddir, installdir. OK: 'config'
    * start subshell in top_srcdir, builddir, installdir
