@@ -18,6 +18,7 @@ AC[_]CONFIG_FILES(@<:@Makefile@:>@)
 AC[_]OUTPUT
 ])dnl
 AT_DATA([test.git/Makefile.am], [dnl
+TESTS = foobar
 bin_PROGRAMS = foobar
 foobar_SOURCES = foobar.c
 ])dnl

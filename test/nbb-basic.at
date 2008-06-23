@@ -7,7 +7,7 @@ dnl ===================================================================
 
 dnl ===================================================================
 
-AT_SETUP([nbb: --version option])
+AT_SETUP([nbb basic: --version option])
 AT_KEYWORDS([nbb version])
 AT_CHECK([nbb --version],
 [0],
@@ -15,7 +15,7 @@ AT_CHECK([nbb --version],
 ])
 AT_CLEANUP()
 
-AT_SETUP([nbb: --version package name consistency])
+AT_SETUP([nbb basic: --version package name consistency])
 AT_KEYWORDS([nbb version])
 AT_CHECK([nbb --version | sed 's/^@<:@^(@:>@*(//; s/)@<:@^)@:>@*$//' | sed "s/'//"],
 [0],
@@ -25,22 +25,31 @@ AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: --help option])
+AT_SETUP([nbb basic: --help option])
 AT_KEYWORDS([nbb help])
 AT_CHECK([nbb --help], [0], [ignore], [ignore])
 AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: help command])
+AT_SETUP([nbb basic: no parameters at all])
+AT_KEYWORDS([nbb no parameters])
+AT_CHECK([nbb], [2],
+[Command line error: nbb requires some arguments
+], [])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb help: without params])
 AT_KEYWORDS([nbb help])
 AT_CHECK([nbb help], [0], [ignore], [])
 AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: help <command> command])
-AT_KEYWORDS([nbb help])
+AT_SETUP([nbb help: command help])
+AT_KEYWORDS([nbb help command])
 AT_CHECK([dnl
 sep='======================================================================='
 echo "$sep"
@@ -55,7 +64,7 @@ sed -n 's/^\t\([^ \t]\{1,\}\).*/\1/p'
 
 dnl ===================================================================
 
-AT_SETUP([nbb: global option --vcs=git])
+AT_SETUP([nbb global option: --vcs=git])
 AT_KEYWORDS([nbb vcs global])
 AT_CHECK([nbb --vcs=git --version], [0], [dnl
 nbb (ndim's branch builder) AT_PACKAGE_VERSION
@@ -64,7 +73,7 @@ AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: global option --vcs git])
+AT_SETUP([nbb global option: --vcs git])
 AT_KEYWORDS([nbb vcs global])
 AT_CHECK([nbb --vcs git --version], [0], [dnl
 nbb (ndim's branch builder) AT_PACKAGE_VERSION
@@ -73,7 +82,7 @@ AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: global option -v git])
+AT_SETUP([nbb global option: -v git])
 AT_KEYWORDS([nbb vcs global])
 AT_CHECK([nbb -v git --version], [0], [dnl
 nbb (ndim's branch builder) AT_PACKAGE_VERSION
@@ -82,19 +91,17 @@ AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: multiple global option -v git --vcs git])
+AT_SETUP([nbb global option: multiple -v git --vcs git])
 AT_KEYWORDS([nbb vcs global])
 AT_CHECK([nbb -v git --vcs git --version], [1], [ignore], [ignore])
 AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: internal-config command])
+AT_SETUP([nbb internal-config: show internal config])
 AT_KEYWORDS([nbb internal-config])
 AT_CHECK([nbb internal-config], [0], [ignore], [])
 AT_CLEANUP()
-
-dnl ===================================================================
 
 dnl ===================================================================
 

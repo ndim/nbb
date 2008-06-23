@@ -5,7 +5,7 @@ AT_TESTED([nbb])
 
 dnl ===================================================================
 
-AT_SETUP([nbb: git config defaults])
+AT_SETUP([nbb config: git defaults])
 AT_KEYWORDS([nbb git config])
 AT_CHECK([mkdir test.git && cd test.git])
 AT_CHECK([cd test.git && git init], [0],
@@ -26,7 +26,7 @@ AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: git config set/get])
+AT_SETUP([nbb config: git set/get])
 AT_KEYWORDS([nbb git config])
 AT_CHECK([mkdir test.git && cd test.git])
 AT_CHECK([cd test.git && git init], [0],
@@ -52,7 +52,7 @@ AT_CLEANUP()
 
 dnl ===================================================================
 
-AT_SETUP([nbb: bzr config defaults])
+AT_SETUP([nbb config: bzr defaults])
 AT_KEYWORDS([nbb bzr config])
 AT_CHECK([mkdir test.bzr && cd test.bzr])
 AT_CHECK([cd test.bzr && bzr init && bzr nick testnick])
@@ -68,10 +68,6 @@ echo "$PWD/test.bzr/_install/testnick" > expout
 AT_CHECK([cd test.bzr && nbb config installdir], [0], [expout])
 AT_CHECK([rm -rf test.git])
 AT_CLEANUP()
-
-dnl ===================================================================
-
-dnl ===================================================================
 
 dnl ===================================================================
 
