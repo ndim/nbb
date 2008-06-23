@@ -22,20 +22,22 @@ DONE:
  * VCS config support ('git config', etc.)
  * Build system support: automake/autoconf
  * Merge stuff from Eclipse to src/own/nbb and vice versa.
+ * Write test cases for init, configure, build, install.
+ * Write test cases for all nbb commands.
+
+TODO: (to get git-amb equivalent functionality)
+ * Fine-tune init, configure, build, install commands with knowledge
+   gained with git-amb, especially the command interdependencies.
+ * Implement *-sh and *-run commands.
 
 TODO: (Large list)
  * BS support: cmake, scons, ...
  * VCS support: SVN, darcs, hg, ...
- * Fine-tune init, configure, build, install commands with knowledge
-   gained with git-amb, especially the command interdependencies.
  * Out-of-source builds for systems which require in-source-tree builds:
    "cp -rl foo.src foo.build"?
- * Implement *-sh and *-run commands.
  * General removal of redundancy in Python code.
  * Make sure the if cmp ... mv .. rm in make rules are correct and useful.
  * More declarative syntax elements in the Python code.
- * Write test cases for init, configure, build, install.
- * Write test cases for all nbb commands.
  * Use declarations for command line parsing, and help text generation.
  * Add global --nick or similar option to determine the branch
    name to use for composing the pathes.
