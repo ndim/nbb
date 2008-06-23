@@ -43,7 +43,7 @@ class BSSourceTree(object):
     def detect(cls, vcs_tree, context):
         """Find BS tree type and return it"""
         if len(BSSourceTree.plugins) < 1:
-            raise "No BS source tree classes registered"
+            raise NoPluginsRegistered(cls)
         matches = PluginDict()
         for key, klass in BSSourceTree.plugins.items():
             try:

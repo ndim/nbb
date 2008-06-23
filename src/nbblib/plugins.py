@@ -1,3 +1,6 @@
+import sys
+
+
 class DuplicatePluginName(Exception):
     pass
 
@@ -34,6 +37,15 @@ class PluginDict(object):
 # http://gulopine.gamemusic.org/2008/jan/10/simple-plugin-framework/
 # Slightly modified go store plugins as dict.
 ########################################################################
+
+
+class NoPluginsRegistered(Exception):
+    def __init__(self, cls):
+        super(NoPluginsRegistered, self).__init__()
+        self.cls = cls
+    def __str__(self):
+        return "No %s plugins registered" % (self.cls.__name__)
+    
 
 class GenericPluginMeta(type):
     def __init__(cls, name, bases, attrs):

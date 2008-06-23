@@ -109,7 +109,20 @@ def print_version(context):
 
 def print_help(context):
     print __doc__ % context,
+    
+    
+class PropertySetAgainError(Exception):
+    def __str__(self):
+        return "Property cannot be set more than once"
 
+
+class InvalidPropertyValue(Exception):
+    def __init__(self, value):
+        super(InvalidPropertyValue, self).__init__()
+        self.value = value
+    def __str__(self):
+        return "Property cannot be set to invalid value '%s'" % self.value
+    
 
 class Property(object):
     def __init__(self, **kwargs):
@@ -126,9 +139,9 @@ class Property(object):
     def __set__(self, instance, value):
         # print "Property.__set__", instance, value
         if hasattr(self, 'value'):
-            raise "Property cannot be set more than once"
+            raise PropertySetAgainError()
         elif not self.isvalid(value):
-            raise "Property cannot be set to invalid value '%s'" % value
+            raise InvalidPropertyValue
         else:
             self.value = self.convert(value)
     def __str__(self):

@@ -73,7 +73,7 @@ class VCSourceTree(object):
     def detect(cls, srcdir, context):
         """Detect VCS tree type and return object representing it"""
         if len(VCSourceTree.plugins) < 1:
-            raise "No VC source tree classes registered"
+            raise NoPluginsRegistered(cls)
         matches = PluginDict()
         for key, klass in VCSourceTree.plugins.items():
             try:
