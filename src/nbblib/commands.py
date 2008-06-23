@@ -26,10 +26,12 @@ def adjust_doc(doc):
 
 
 class CommandLineError(Exception):
-    def __init__(self, message, *args):
+    def __init__(self, message, *args, **kwargs):
         super(CommandLineError, self).__init__()
         if args:
             self.msg = message % args
+        elif kwargs:
+            self.msg = message % kwargs
         else:
             self.msg = message
     def __str__(self):

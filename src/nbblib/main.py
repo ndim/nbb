@@ -21,15 +21,16 @@ Features:
 DONE:
  * VCS config support ('git config', etc.)
  * Build system support: automake/autoconf
+ * Merge stuff from Eclipse to src/own/nbb and vice versa.
 
 TODO: (Large list)
- * Merge stuff from Eclipse to src/own/nbb and vice versa.
- * Build system support: cmake, scons, ...
+ * BS support: cmake, scons, ...
+ * VCS support: SVN, darcs, hg, ...
  * Fine-tune init, configure, build, install commands with knowledge
    gained with git-amb, especially the command interdependencies.
  * Out-of-source builds for systems which require in-source-tree builds:
-   cp -rl foo.src foo.build ?
- * implement *-sh and *-run commands
+   "cp -rl foo.src foo.build"?
+ * Implement *-sh and *-run commands.
  * General removal of redundancy in Python code.
  * Make sure the if cmp ... mv .. rm in make rules are correct and useful.
  * More declarative syntax elements in the Python code.
@@ -214,8 +215,8 @@ def main(argv):
     context.prog = argv[0]
 
     if len(argv) < 2:
-        print "Fatal: %(prog)s requires some arguments" % context
-        return 2
+        raise CommandLineError("%(prog)s requires some arguments",
+                               prog=context.prog)
 
     i = 1
     while i<len(argv):
@@ -248,3 +249,12 @@ def main(argv):
     cmd = argv[i]
     cmdargs = argv[i+1:]
     nbb = NBB_Command(cmd, cmdargs, context=context)
+
+
+def cmdmain(argv):
+    try:
+        main(argv)
+    except CommandLineError, e:
+        print e
+        sys.exit(2)
+

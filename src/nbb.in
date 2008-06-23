@@ -39,7 +39,7 @@ if __name__ == '__main__':
       sys.stderr.write("nbb: Fatal: Could not load nbblib.\n")
       sys.exit(3)
    import nbblib.main
-   nbblib.main.main(sys.argv)
+   nbblib.main.cmdmain(sys.argv)
 
 # vim: syntax=python
 # Local Variables:
