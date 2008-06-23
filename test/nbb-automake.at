@@ -1,0 +1,42 @@
+dnl ===================================================================
+
+AT_COPYRIGHT([Copyright (C) 2008 Hans Ulrich Niedermann])
+AT_TESTED([nbb])
+
+dnl ===================================================================
+
+AT_SETUP([nbb: init])
+AT_KEYWORDS([nbb init])
+AT_CREATE_GIT_AM()
+AT_CHECK([cd test.git && nbb init], [0], [ignore], [ignore])
+AT_REMOVE_GIT_AM()
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb: configure])
+AT_KEYWORDS([nbb configure])
+AT_CREATE_GIT_AM()
+AT_CHECK([cd test.git && nbb configure], [0], [ignore], [ignore])
+AT_REMOVE_GIT_AM()
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb: build])
+AT_KEYWORDS([nbb build])
+AT_CREATE_GIT_AM()
+AT_CHECK([cd test.git && nbb build], [0], [ignore], [ignore])
+AT_REMOVE_GIT_AM()
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb: install])
+AT_KEYWORDS([nbb install])
+AT_CREATE_GIT_AM()
+AT_CHECK([cd test.git && nbb install], [0], [ignore], [ignore])
+AT_REMOVE_GIT_AM()
+AT_CLEANUP()
+
+dnl ===================================================================

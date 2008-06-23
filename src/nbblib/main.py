@@ -28,7 +28,10 @@ TODO: (Large list)
    gained with git-amb, especially the command interdependencies.
  * implement *-sh and *-run commands
  * General removal of redundancy in Python code.
+ * Make sure the if cmp ... mv .. rm in make rules are correct and useful.
  * More declarative syntax elements in the Python code.
+ * Write test cases for init, configure, build, install.
+ * Write test cases for all nbb commands.
  * Use declarations for command line parsing, and help text generation.
  * Add global --nick or similar option to determine the branch
    name to use for composing the pathes.

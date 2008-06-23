@@ -7,6 +7,7 @@ TESTCASES =
 TESTCASES += autotest.at
 TESTCASES += nbb-basic.at
 TESTCASES += nbb-config.at
+TESTCASES += nbb-automake.at
 # Add more testcases here
 
 EXTRA_DIST += $(TESTCASES)

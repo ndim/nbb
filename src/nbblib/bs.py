@@ -97,13 +97,14 @@ class AutomakeSourceTree(BSSourceTree):
 
     def configure(self):
         """'configure --prefix'"""
+        if not os.path.exists(os.path.join(self.config.srcdir, 'configure')):
+            self.init()
         builddir = self.config.builddir
         if not os.path.exists(builddir): os.makedirs(builddir)
-        if not os.path.exists(os.path.join(builddir, 'configure')):
-            self.init
         os.chdir(builddir)
         prog_run(["%s/configure" % self.config.srcdir,
-                  "--prefix=%s" % self.config.installdir
+                  "--prefix=%s" % self.config.installdir,
+                  "--enable-maintainer-mode",
                   ], self.context)
 
     def build(self):
