@@ -43,16 +43,3 @@ git-version-check-news:
 git-version-stamp:
 	echo "$(PACKAGE_VERSION)" > "$(distdir)/version-stamp"
 
-# Update *.h file to contain up-to-date version number
-A_V = package-version-internal
-CLEANFILES    += $(A_V).h
-BUILT_SOURCES += $(A_V).h.stamp
-$(A_V).h.stamp:
-	@current_ver=`$(SHELL) $(top_srcdir)/$(BUILD_SCRIPT_DIR)/package-version $(top_srcdir) version-stamp`; \
-	{ echo '#ifndef PACKAGE_VERSION_INTERNAL_H'; \
-	  echo "#define PACKAGE_VERSION_INTERNAL \"$${current_ver}\""; \
-	  echo "#endif /* !PACKAGE_VERSION_INTERNAL */"; } > "$(A_V).h.new"
-	@if test -f "$(A_V).h" \
-	&& cmp "$(A_V).h.new" "$(A_V).h"; then :; \
-	else cat "$(A_V).h.new" > "$(A_V).h"; fi; \
-	rm -f "$(A_V).h.new"
