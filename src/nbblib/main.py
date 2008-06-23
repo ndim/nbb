@@ -9,7 +9,7 @@ Build, install given branch of source code into a branch specific place
 Copyright (C) 2007, 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
 TBA: License conditions
 
-Usage: %(prog)s <to-be-determined>
+Usage: %(prog)s [general options] <command> [command specific options]
 
 Features:
  * supports git branches
@@ -23,9 +23,12 @@ DONE:
  * Build system support: automake/autoconf
 
 TODO: (Large list)
+ * Merge stuff from Eclipse to src/own/nbb and vice versa.
  * Build system support: cmake, scons, ...
  * Fine-tune init, configure, build, install commands with knowledge
    gained with git-amb, especially the command interdependencies.
+ * Out-of-source builds for systems which require in-source-tree builds:
+   cp -rl foo.src foo.build ?
  * implement *-sh and *-run commands
  * General removal of redundancy in Python code.
  * Make sure the if cmp ... mv .. rm in make rules are correct and useful.
