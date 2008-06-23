@@ -116,6 +116,7 @@ class Property(object):
         if kwargs.has_key('default'):
             self.default = kwargs['default']
     def __get__(self, instance, owner):
+        # print "Property.__get__", instance, owner
         if hasattr(self, 'value'):
             return self.value
         elif hasattr(self, 'default'):
@@ -123,6 +124,7 @@ class Property(object):
         else:
             return None
     def __set__(self, instance, value):
+        # print "Property.__set__", instance, value
         if hasattr(self, 'value'):
             raise "Property cannot be set more than once"
         elif not self.isvalid(value):

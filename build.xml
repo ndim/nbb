@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="unzip" default="make">
+<project name="nbb" default="check">
     <description>
         Ant adaptor for the nbb Automake/Makefile based build system.
     </description>
@@ -7,7 +7,8 @@
 	   <target name="check" description="run nbb checks">
 	        <exec executable="git-amb">
 	            <arg value="make"/>
-	        	<arg value="check"/>
+	            <arg value="check"/>
+	            <arg value="TESTSUITEFLAGS=-e -v"/>
 	        </exec>
 	    </target>
 	   <target name="make" description="build nbb">
