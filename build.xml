@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<project name="unzip" default="make">
+    <description>
+        Ant adaptor for the nbb Automake/Makefile based build system.
+    </description>
+
+	   <target name="check" description="run nbb checks">
+	        <exec executable="git-amb">
+	            <arg value="make"/>
+	        	<arg value="check"/>
+	        </exec>
+	    </target>
+	   <target name="make" description="build nbb">
+	        <exec executable="git-amb">
+	            <arg value="make"/>
+	        </exec>
+       </target>
+	   <target name="install" description="build and install nbb">
+	        <exec executable="git-amb">
+	        	<arg value="make"/>	            
+	        	<arg value="install"/>
+	        </exec>
+	    </target>
+	    <target name="distcheck" description="run nbb distcheck">
+		        <exec executable="git-amb">
+		            <arg value="make"/>
+		        	<arg value="distcheck"/>
+		        </exec>
+		</target>
+</project>
