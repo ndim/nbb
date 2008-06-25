@@ -14,6 +14,19 @@ if sys.version_info < (2,4):
    print "Fatal: This program requires Python 2.4 or later."
    sys.exit(3)
 
+import logging # since python 2.3
+
+# funcName: Since python 2.5
+# format="%(filename)s:%(lineno)d:%(funcName)s:"
+logging.basicConfig(level = logging.DEBUG,
+                    format = "%(levelname)s: %(message)s",
+                    stream = sys.stderr)
+if False:
+   logging.debug("xxx debug")
+   logging.info("xxx info")
+   logging.warning("xxx warn")
+   logging.error("xxx error")
+
 if __name__ == '__main__':
    pythondir = "@pythondir@"
    lib_found = False

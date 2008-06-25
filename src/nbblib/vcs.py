@@ -74,13 +74,13 @@ class VCSourceTree(object):
         """Detect VCS tree type and return object representing it"""
         if len(cls.plugins) < 1:
             raise NoPluginsRegistered(cls)
-        logging.debug("CLASS %s", cls)
+        #logging.debug("CLASS %s", cls)
         matches = PluginDict()
         for key, klass in cls.plugins.iteritems():
             try:
                 t = klass(srcdir, context)
                 if t.tree_root() == srcdir:
-                    logging.debug("KLASS %s", klass)
+                    #logging.debug("KLASS %s", klass)
                     matches[key] = t
             except NotAVCSourceTree, e:
                 pass
