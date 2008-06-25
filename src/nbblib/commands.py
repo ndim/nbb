@@ -153,7 +153,7 @@ class SourceClassCommand(Command):
         context = kwargs['context']
         srcdir = os.getcwd()
         absdir = os.path.abspath(srcdir)
-        self.vcs_sourcetree = VCSourceTree.detect(absdir, context)
+        self.vcs_sourcetree = VCSourceTree.detect(context, absdir)
         if context.verbose:
             print "vcs_sourcetree", str(self.vcs_sourcetree)
         assert(self.vcs_sourcetree)

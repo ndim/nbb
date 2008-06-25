@@ -6,6 +6,8 @@ from nbblib.package import *
 from nbblib.plugins import *
 from nbblib.progutils import *
 
+from nbblib import newplugins
+
 
 class AbstractConfig(object):
     """Return static config until we implement real config reading"""
@@ -51,7 +53,7 @@ class AmbigousVCSource(Exception):
                 % (self.srcdir, '\n '.join(alist)))
 
 
-class VCSourceTree(object):
+class VCSourceTree(newplugins.GenericDetectPlugin):
     """
     Mount point for plugins which refer to actions that can be performed.
 
@@ -64,31 +66,13 @@ class VCSourceTree(object):
         Must raise NotAVCSourceTree() if it is not a VCS source tree
     """
     __metaclass__ = GenericPluginMeta
-
-    def __init__(self, context):
-        super(VCSourceTree, self).__init__()
-        self.context = context
+    no_match_exception = PluginNoMatch
+    ambigous_match_exception = AmbigousPluginDetection
 
     @classmethod
-    def detect(cls, srcdir, context):
-        """Detect VCS tree type and return object representing it"""
-        if len(cls.plugins) < 1:
-            raise NoPluginsRegistered(cls)
-        #logging.debug("CLASS %s", cls)
-        matches = PluginDict()
-        for key, klass in cls.plugins.iteritems():
-            try:
-                t = klass(srcdir, context)
-                if t.tree_root() == srcdir:
-                    #logging.debug("KLASS %s", klass)
-                    matches[key] = t
-            except NotAVCSourceTree, e:
-                pass
-        if len(matches) > 1:
-            raise AmbigousVCSource(srcdir, matches.values())
-        elif len(matches) < 1:
-            raise NotAVCSourceTree(srcdir)
-        return matches[matches.keys()[0]]
+    def validate(cls, obj, *args, **kwargs):
+        srcdir = args[0]
+        return obj.tree_root() == srcdir
 
     def get_config(self):
         """Get configuration object which determines builddir etc"""
@@ -120,7 +104,7 @@ class GitSourceTree(VCSourceTree):
 
     name = 'git'
 
-    def __init__(self, srcdir, context):
+    def __init__(self, context, srcdir):
         super(GitSourceTree, self).__init__(context)
         os.chdir(srcdir)
         if "true" != prog_stdout(["git", "rev-parse",
@@ -188,7 +172,7 @@ class BzrSourceTree(VCSourceTree):
 
     name = 'bzr'
 
-    def __init__(self, srcdir, context):
+    def __init__(self, context, srcdir):
         super(BzrSourceTree, self).__init__(context)
         try:
             import bzrlib.workingtree
