@@ -45,6 +45,9 @@ TODO: (Large list)
  * Use declarations for command line parsing, and help text generation.
  * Add global --nick or similar option to determine the branch
    name to use for composing the pathes.
+ * Find or implement @abstractmethod decorator.
+ * Test cases for proper handling of detecting (0, 1, >1) x (VCS, BS).
+ * Unify detect() methods.
  * Store config in ${srcdir}/.nbb.conf instead of 'git config'?
    More portable. bzr does not have a config interface, for example.
  * Model different "stages" of e.g. automake builds as distinct objects,
