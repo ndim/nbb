@@ -45,8 +45,8 @@ class AmbigousVCSource(Exception):
         fmt = "  %-9s %-15s %s"
         def strmatch(m):
             return fmt % (m.name, m.branch_name(), m.tree_root())
-        alist = ([fmt % ('VCS Type', 'Branch Name', 'Source tree root')]
-                 + map(strmatch, self.matches))
+        alist = ([fmt % ('VCS Type', 'Branch Name', 'Source tree root')] +
+                 [fmt % (m.name, m.branch_name(), m.tree_root()) for m in self.matches])
         return ("More than one source tree VCS type detected for '%s':\n#%s"
                 % (self.srcdir, '\n '.join(alist)))
 
@@ -72,13 +72,15 @@ class VCSourceTree(object):
     @classmethod
     def detect(cls, srcdir, context):
         """Detect VCS tree type and return object representing it"""
-        if len(VCSourceTree.plugins) < 1:
+        if len(cls.plugins) < 1:
             raise NoPluginsRegistered(cls)
+        # print "CLASS", cls
         matches = PluginDict()
-        for key, klass in VCSourceTree.plugins.iteritems():
+        for key, klass in cls.plugins.iteritems():
             try:
                 t = klass(srcdir, context)
                 if t.tree_root() == srcdir:
+                    # print "KLASS", klass
                     matches[key] = t
             except NotAVCSourceTree, e:
                 pass

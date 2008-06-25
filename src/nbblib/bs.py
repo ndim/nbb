@@ -42,19 +42,21 @@ class BSSourceTree(object):
     @classmethod
     def detect(cls, vcs_tree, context):
         """Find BS tree type and return it"""
-        if len(BSSourceTree.plugins) < 1:
+        if len(cls.plugins) < 1:
             raise NoPluginsRegistered(cls)
+        # print "CLASS", cls
         matches = PluginDict()
-        for key, klass in BSSourceTree.plugins.iteritems():
+        for key, klass in cls.plugins.iteritems():
             try:
                 t = klass(vcs_tree, context)
                 if t.tree_root() == vcs_tree.tree_root():
+                    # print "KLASS", klass
                     matches[key] = t
             except NotABSSourceTree, e:
                 pass
         if len(matches) > 1:
             raise ("More than one source tree BS type detected for '%s': %s"
-                   % (vcs_tree, ", ".join(map(lambda x:str(x), matches))))
+                   % (vcs_tree, ", ".join([str(x) for x in matches])))
         elif len(matches) < 1:
             raise NotABSSourceTree(vcs_tree)
         return matches[matches.keys()[0]]
