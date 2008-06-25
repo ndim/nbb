@@ -43,6 +43,8 @@ TODO: (Large list)
  * Make sure the if cmp ... mv .. rm in make rules are correct and useful.
  * More declarative syntax elements in the Python code.
  * Use declarations for command line parsing, and help text generation.
+   Use optparse stuff for both global params and extra optparse stuff
+   for each command?
  * Add global --nick or similar option to determine the branch
    name to use for composing the pathes.
  * Find or implement @abstractmethod decorator.
