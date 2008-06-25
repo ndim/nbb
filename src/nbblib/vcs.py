@@ -1,6 +1,6 @@
 import os
+import logging
 import urlparse
-
 
 from nbblib.package import *
 from nbblib.plugins import *
@@ -74,13 +74,13 @@ class VCSourceTree(object):
         """Detect VCS tree type and return object representing it"""
         if len(cls.plugins) < 1:
             raise NoPluginsRegistered(cls)
-        # print "CLASS", cls
+        logging.debug("CLASS %s", cls)
         matches = PluginDict()
         for key, klass in cls.plugins.iteritems():
             try:
                 t = klass(srcdir, context)
                 if t.tree_root() == srcdir:
-                    # print "KLASS", klass
+                    logging.debug("KLASS %s", klass)
                     matches[key] = t
             except NotAVCSourceTree, e:
                 pass

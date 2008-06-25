@@ -113,6 +113,9 @@ Global options:
 """
 
 
+import logging
+
+
 from nbblib.bs import *
 from nbblib.commands import *
 from nbblib.package import *
@@ -263,7 +266,8 @@ def main(argv):
 def cmdmain(argv):
     try:
         main(argv)
+        logging.shutdown()
     except CommandLineError, e:
+        logging.shutdown()
         print e
         sys.exit(2)
-
