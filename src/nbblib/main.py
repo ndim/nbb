@@ -31,6 +31,10 @@ TODO: (to get git-amb equivalent functionality)
  * Implement *-sh and *-run commands.
 
 TODO: (Large list)
+ * Determine required feature sets (properties, new-style classes, etc.)
+   and then check that the Python environment is actually compatible.
+   @classmethod -> Python 2.4
+   new style classes -> Python 2.2
  * BS support: cmake, scons, ...
  * VCS support: SVN, darcs, hg, ...
  * Out-of-source builds for systems which require in-source-tree builds:
