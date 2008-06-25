@@ -45,7 +45,7 @@ class BSSourceTree(object):
         if len(BSSourceTree.plugins) < 1:
             raise NoPluginsRegistered(cls)
         matches = PluginDict()
-        for key, klass in BSSourceTree.plugins.items():
+        for key, klass in BSSourceTree.plugins.iteritems():
             try:
                 t = klass(vcs_tree, context)
                 if t.tree_root() == vcs_tree.tree_root():

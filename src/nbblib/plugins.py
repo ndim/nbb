@@ -13,14 +13,18 @@ class PluginDict(object):
     """
     def __init__(self):
         self.dict = {}
-    def __getitem__(self, *args):
-        return self.dict.__getitem__(*args)
+
+    # This is the important difference between PluginDict and dict.
     def __setitem__(self, key, value):
         if self.dict.has_key(key):
             raise DuplicatePluginName()
         else:
             self.dict[key] = value
+
+    # Forward all other dict methods.
+    def __getitem__(self, *args): return self.dict.__getitem__(*args)
     def items(self): return self.dict.items()
+    def iteritems(self): return self.dict.iteritems()
     def keys(self): return self.dict.keys()
     def values(self): return self.dict.values()
     def __iter__(self): return self.dict.__iter__()

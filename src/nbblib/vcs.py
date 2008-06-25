@@ -75,7 +75,7 @@ class VCSourceTree(object):
         if len(VCSourceTree.plugins) < 1:
             raise NoPluginsRegistered(cls)
         matches = PluginDict()
-        for key, klass in VCSourceTree.plugins.items():
+        for key, klass in VCSourceTree.plugins.iteritems():
             try:
                 t = klass(srcdir, context)
                 if t.tree_root() == srcdir:
