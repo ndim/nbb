@@ -118,7 +118,7 @@ class PluginDict(dict):
 
 class GenericPluginMeta(type):
     def __init__(cls, name, bases, attrs):
-        logging.debug("%s %s %s %s", cls, name, bases, attrs)
+        logging.debug("META_INIT %s %s %s %s", cls, name, bases, attrs)
         if not hasattr(cls, 'plugins'):
             # This branch only executes when processing the mount point itself.
             # So, since this is a new plugin type, not an implementation, this
@@ -129,7 +129,7 @@ class GenericPluginMeta(type):
             # This must be a plugin implementation, which should be registered.
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
-            logging.debug("%s %s", cls, cls.plugins)
+            logging.debug("Registering %s together with %s", cls, cls.plugins)
             cls.plugins[cls.name] = cls
         else:
             # This must be an abstract subclass of plugins.
