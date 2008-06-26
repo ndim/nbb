@@ -2,7 +2,6 @@ import nbblib.bs as bs
 import nbblib.commands as commands
 import nbblib.newplugins as newplugins
 import nbblib.package as package
-import nbblib.plugins as plugins
 import nbblib.vcs as plugins
 
 from package import PACKAGE_VERSION
