@@ -2,6 +2,7 @@ dnl ===================================================================
 
 AT_COPYRIGHT([Copyright (C) 2008 Hans Ulrich Niedermann])
 AT_TESTED([nbb])
+AT_TESTED([automake autoconf autom4te aclocal autoheader])
 
 dnl ===================================================================
 
