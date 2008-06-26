@@ -52,11 +52,16 @@ class BSSourceTree(plugins.GenericDetectPlugin):
                                            repr(self.tree_root))
 
     # Abstract methods
-    def _get_tree_root(self): raise NotImplementedError()
-    def init(self): raise NotImplementedError()
-    def configure(self): raise NotImplementedError()
-    def build(self): raise NotImplementedError()
-    def install(self): raise NotImplementedError()
+    @plugins.abstractmethod
+    def _get_tree_root(self): pass
+    @plugins.abstractmethod
+    def init(self): pass
+    @plugins.abstractmethod
+    def configure(self): pass
+    @plugins.abstractmethod
+    def build(self): pass
+    @plugins.abstractmethod
+    def install(self): pass
 
 
 class AutomakeSourceTree(BSSourceTree):

@@ -218,24 +218,44 @@ class BuildTestCommand(SourceClassCommand):
 class InitCommand(SourceClassCommand):
     name = 'init'
     summary = 'initialize buildsystem'
+    def validate_args(self, *args, **kwargs):
+        """Validate command line arguments"""
+        if len(args) > 0:
+            raise CommandLineError("'%s' command takes no parameters",
+                                   self.name)
     def run(self):
         self.bs_sourcetree.init()
 
 class ConfigureCommand(SourceClassCommand):
     name = 'configure'
     summary = 'configure buildsystem'
+    def validate_args(self, *args, **kwargs):
+        """Validate command line arguments"""
+        if len(args) > 0:
+            raise CommandLineError("'%s' command takes no parameters",
+                                   self.name)
     def run(self):
         self.bs_sourcetree.configure()
 
 class BuildCommand(SourceClassCommand):
     name = 'build'
     summary = 'build from source'
+    def validate_args(self, *args, **kwargs):
+        """Validate command line arguments"""
+        if len(args) > 0:
+            raise CommandLineError("'%s' command takes no parameters",
+                                   self.name)
     def run(self):
         self.bs_sourcetree.build()
 
 class InstallCommand(SourceClassCommand):
     name = 'install'
     summary = 'install the built things'
+    def validate_args(self, *args, **kwargs):
+        """Validate command line arguments"""
+        if len(args) > 0:
+            raise CommandLineError("'%s' command takes no parameters",
+                                   self.name)
     def run(self):
         self.bs_sourcetree.install()
 

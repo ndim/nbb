@@ -60,6 +60,8 @@ class MyPluginB(MyPluginType):
 
 import sys
 import logging
+import types
+import functools
 
 
 class NoPluginsRegistered(Exception):
@@ -99,6 +101,43 @@ class AmbigousPluginDetection(Exception):
                                               self.context,
                                               self.args,
                                               self.kwargs)
+
+
+# Might be used later when we do class introspection looking for
+# abstract methods.
+class UNUSED_AbstractMethodsInConcreteClass(Exception):
+    def __init__(self, cls, methods):
+        self.cls = cls
+        self.methods = methods
+    def __str__(self):
+        methods = "\n  ".join(self.methods)
+        return "Concrete class %s.%s must implement these methods:\n  %s" \
+            % (self.cls.__module__,
+               self.cls.__name__,
+               methods)
+
+
+class AbstractMethodError(Exception):
+    def __init__(self, name, module):
+        self.name = name
+        self.module = module
+    def __str__(self):
+        # FIXME: Class name?
+        return "Abstract method %s called someplace in %s" \
+            % (repr(self.name), repr(self.module))
+
+
+def abstractmethod(fun):
+    @functools.wraps(fun)
+    def f(self, *args, **kwargs):
+        # fun(self, *args, **kwargs)
+        raise AbstractMethodError(name=fun.__name__,
+                                  module=fun.__module__)
+    # We might add some introspection tool later, to be run
+    # in e.g. GenericPluginMeta.__init__(...), which makes sure
+    # that there are no abstract methods in a non-abstract class.
+    # f.abstract_method = True
+    return f
 
 
 class PluginDict(dict):
