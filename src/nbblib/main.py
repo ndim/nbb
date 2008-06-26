@@ -45,6 +45,7 @@ TODO: (Large list)
  * Use declarations for command line parsing, and help text generation.
    Use optparse stuff for both global params and extra optparse stuff
    for each command?
+ * Add pydoc docs.
  * Add global --nick or similar option to determine the branch
    name to use for composing the pathes.
  * Find or implement @abstractmethod decorator.
