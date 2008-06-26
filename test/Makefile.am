@@ -42,7 +42,7 @@ check-local: git-version-check atconfig atlocal $(srcdir)/$(TESTSUITE)
 
 installcheck-local: atconfig atlocal $(srcdir)/$(TESTSUITE)
 	@echo "INFO: Running installed test suite"; \
-	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH='$(bindir)' \
+	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH='$(DESTDIR)$(bindir)' \
 		PYTHONPATH="$(DESTDIR)$(pythondir)" \
 		$(TESTSUITEFLAGS)
 
