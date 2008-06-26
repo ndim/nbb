@@ -2,8 +2,8 @@ import os
 import logging
 import urlparse
 
-from nbblib.package import *
-from nbblib.progutils import *
+from nbblib import package
+from nbblib import progutils
 
 from nbblib import newplugins as plugins
 
@@ -119,10 +119,10 @@ class GitSourceTree(VCSourceTree):
     def __init__(self, context, srcdir):
         super(GitSourceTree, self).__init__(context)
         os.chdir(srcdir)
-        if "true" != prog_stdout(["git", "rev-parse",
-                                  "--is-inside-work-tree"]):
+        if "true" != progutils.prog_stdout(["git", "rev-parse",
+                                            "--is-inside-work-tree"]):
             raise self.no_match_exception(srcdir)
-        reldir = prog_stdout(["git", "rev-parse", "--show-cdup"])
+        reldir = progutils.prog_stdout(["git", "rev-parse", "--show-cdup"])
         if reldir:
             os.chdir(reldir)
         self.__tree_root = os.getcwd()
@@ -135,7 +135,7 @@ class GitSourceTree(VCSourceTree):
         return self.__tree_root
 
     def _get_branch_name(self):
-        bname = prog_stdout(["git", "symbolic-ref", "HEAD"])
+        bname = progutils.prog_stdout(["git", "symbolic-ref", "HEAD"])
         refs,heads,branch = bname.split('/')
         assert(refs=='refs' and heads=='heads')
         return branch
@@ -147,12 +147,12 @@ class GitConfig(AbstractConfig):
     def __init__(self, *args, **kwargs):
         super(GitConfig, self).__init__(*args, **kwargs)
 
-    def _itemname(self, item): return '.'.join((GIT_CONFIG_PREFIX, item, ))
+    def _itemname(self, item): return '.'.join((package.GIT_CONFIG_PREFIX, item, ))
     def _myreldir(self, rdir):
         return os.path.join(self._srcdir, rdir, self._nick)
 
     def get_builddir(self):
-        ret, stdout, stderr = prog_retstd(['git', 'config', self._itemname('builddir')])
+        ret, stdout, stderr = progutils.prog_retstd(['git', 'config', self._itemname('builddir')])
         assert(stderr == "")
 	if ret == 0 and stdout:
             return self._myreldir(stdout)
@@ -160,13 +160,13 @@ class GitConfig(AbstractConfig):
             return super(GitConfig, self).get_builddir()
 
     def set_builddir(self, value):
-        ret, stdout, stderr = prog_retstd(['git', 'config', self._itemname('builddir'), value])
+        ret, stdout, stderr = progutils.prog_retstd(['git', 'config', self._itemname('builddir'), value])
         assert(ret == 0 and stdout == "" and stderr == "")
 
     builddir = property(get_builddir, set_builddir)
 
     def get_installdir(self):
-        ret, stdout, stderr = prog_retstd(['git', 'config', self._itemname('installdir')])
+        ret, stdout, stderr = progutils.prog_retstd(['git', 'config', self._itemname('installdir')])
         assert(stderr == "")
 	if ret == 0 and stdout:
             return self._myreldir(stdout)
@@ -174,7 +174,7 @@ class GitConfig(AbstractConfig):
             return super(GitConfig, self).get_installdir()
 
     def set_installdir(self, value):
-        ret, stdout, stderr = prog_retstd(['git', 'config', self._itemname('installdir'), value])
+        ret, stdout, stderr = progutils.prog_retstd(['git', 'config', self._itemname('installdir'), value])
         assert(ret == 0 and stdout == "" and stderr == "")
 
     installdir = property(get_installdir, set_installdir)

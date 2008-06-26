@@ -1,9 +1,3 @@
-#from nbblib.bs import *
-#from nbblib.commands import *
-#from nbblib.package import *
-#from nbblib.plugins import *
-#from nbblib.vcs import *
-
 import nbblib.bs as bs
 import nbblib.commands as commands
 import nbblib.newplugins as newplugins

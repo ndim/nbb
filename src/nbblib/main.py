@@ -117,13 +117,14 @@ Global options:
 """
 
 
+import sys
 import logging
 
 
-from nbblib.bs import *
-from nbblib.commands import *
-from nbblib.package import *
-from nbblib.vcs import *
+from nbblib import bs
+from nbblib import commands
+from nbblib import package
+from nbblib import vcs
 
 import nbblib.newplugins as plugins
 
@@ -191,12 +192,12 @@ class ProgProperty(Property):
 
 class VCSProperty(Property):
     def isvalid(self, value):
-        return (value in VCSourceTree.plugins.keys())
+        return (value in vcs.VCSourceTree.plugins.keys())
 
 
 class BSProperty(Property):
     def isvalid(self, value):
-        return (value in BSSourceTree.plugins.keys())
+        return (value in bs.BSSourceTree.plugins.keys())
 
 
 class BoolProperty(Property):
@@ -227,14 +228,15 @@ class Context(object):
 
 def main(argv):
     context = Context()
-    context.PACKAGE_VERSION = PACKAGE_VERSION
-    context.vcssystems = ", ".join(VCSourceTree.plugins.keys())
-    context.buildsystems = ", ".join(BSSourceTree.plugins.keys())
+    context.PACKAGE_VERSION = package.PACKAGE_VERSION
+    context.vcssystems = ", ".join(vcs.VCSourceTree.plugins.keys())
+    context.buildsystems = ", ".join(bs.BSSourceTree.plugins.keys())
     context.prog = argv[0]
 
     if len(argv) < 2:
-        raise CommandLineError("%(prog)s requires some arguments",
-                               prog=context.prog)
+        raise commands.CommandLineError(\
+            "%(prog)s requires some arguments",
+            prog=context.prog)
 
     i = 1
     while i<len(argv):
@@ -266,7 +268,7 @@ def main(argv):
         i = i + 1
     cmd = argv[i]
     cmdargs = argv[i+1:]
-    nbb = NBB_Command(cmd, cmdargs, context=context)
+    nbb = commands.NBB_Command(cmd, cmdargs, context=context)
 
 
 def cmdmain(argv):
@@ -281,7 +283,7 @@ def cmdmain(argv):
         logging.shutdown()
         print e
         sys.exit(1)
-    except CommandLineError, e:
+    except commands.CommandLineError, e:
         logging.shutdown()
         print e
         sys.exit(2)
