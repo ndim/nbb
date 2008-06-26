@@ -3,6 +3,42 @@ AT_TESTED([autom4te autoconf autoheader autoupdate autoreconf])
 # Local initialization of the test environment would happen here
 
 
+dnl AT_WRAP_GIT([stuff-to-do-with-git-repo])dnl
+m4_define([AT_WRAP_GIT], [dnl
+AT_CHECK([mkdir test.dir && cd test.dir])
+AT_CHECK([cd test.dir && git init], [0],
+[Initialized empty Git repository in .git/
+])dnl
+$1
+AT_CHECK([rm -rf test.dir])dnl
+])dnl
+
+
+dnl AT_WRAP_GIT_SCONS([stuff-to-do-with-tree])dnl
+m4_define([AT_WRAP_GIT_SCONS], [dnl
+AT_WRAP_GIT([dnl
+AT_DATA([test.dir/SConstruct], [dnl
+# Test
+env = Environment()
+env.Configure()
+prog = env.Program('foobar',
+                   source=@<:@'foobar.c'@:>@)
+env.Install('/usr/bin', prog)
+env.Alias('install', '/usr/bin')
+])
+AT_DATA([test.dir/foobar.c], [dnl
+#include <stdio.h>
+int main(int argc, char *argv@<:@@:>@) {
+    printf("FOOBAR!\n");
+    return 0;
+}
+])dnl
+$1
+])dnl
+])dnl
+
+
+dnl AT_CREATE_GIT_AM()dnl
 m4_define([AT_CREATE_GIT_AM], [dnl
 AT_CHECK([mkdir test.git && cd test.git])
 AT_CHECK([cd test.git && git init], [0],

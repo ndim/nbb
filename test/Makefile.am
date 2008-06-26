@@ -8,6 +8,7 @@ TESTCASES += autotest.at
 TESTCASES += nbb-basic.at
 TESTCASES += nbb-detect.at
 TESTCASES += nbb-config.at
+TESTCASES += nbb-scons.at
 TESTCASES += nbb-automake.at
 # Add more testcases here
 
