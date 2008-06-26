@@ -7,8 +7,7 @@ import os
 import logging
 
 from nbblib import progutils
-
-from nbblib import newplugins as plugins
+from nbblib import plugins
 
 
 class NotABSSourceTree(plugins.PluginNoMatch):

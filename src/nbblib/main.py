@@ -124,9 +124,8 @@ import logging
 from nbblib import bs
 from nbblib import commands
 from nbblib import package
+from nbblib import plugins
 from nbblib import vcs
-
-import nbblib.newplugins as plugins
 
 
 def print_version(context):

@@ -4,7 +4,7 @@ import logging
 
 
 import nbblib.package as package
-import nbblib.newplugins as plugins
+import nbblib.plugins as plugins
 import nbblib.progutils as progutils
 import nbblib.vcs as vcs
 import nbblib.bs as bs

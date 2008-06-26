@@ -4,8 +4,7 @@ import urlparse
 
 from nbblib import package
 from nbblib import progutils
-
-from nbblib import newplugins as plugins
+from nbblib import plugins
 
 
 class AbstractConfig(object):
