@@ -137,3 +137,14 @@ class SconsSourceTree(BSSourceTree):
     def _get_tree_root(self):
         return self.__tree_root
 
+    def init(self): pass
+    def configure(self): pass
+
+    def build(self):
+        progutils.prog_run(["scons"],
+                           self.context)
+
+    def install(self):
+        progutils.prog_run(["scons", "install"],
+                           self.context)
+
