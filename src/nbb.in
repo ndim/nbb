@@ -55,7 +55,7 @@ if __name__ == '__main__':
             logging.debug("Import error", exc_info=True)
             sys.path = orig_path
    if not lib_found:
-      logging.error("nbb: Fatal: Could not load nbblib.")
+      logging.error("nbb: Fatal: Could not import nbblib.")
       logging.shutdown()
       sys.exit(3)
    import nbblib.main
