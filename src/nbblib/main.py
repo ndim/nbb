@@ -55,6 +55,7 @@ TODO: (Large list)
  * Model different "stages" of e.g. automake builds as distinct objects,
    including proper dependency detectors, and stuff? OK, we're not going
    to duplicate scons here.
+ * BS autodetection might discover more than one BS instance of the same type?
  * Design nice user interface. Requirements:
    * print top_srcdir, builddir, installdir. OK: 'config'
    * start subshell in top_srcdir, builddir, installdir
@@ -123,6 +124,8 @@ from nbblib.commands import *
 from nbblib.package import *
 from nbblib.vcs import *
 
+import nbblib.newplugins as plugins
+
 
 def print_version(context):
     print "%(prog)s (ndim's branch builder) %(PACKAGE_VERSION)s" % context
@@ -130,8 +133,8 @@ def print_version(context):
 
 def print_help(context):
     print __doc__ % context,
-    
-    
+
+
 class PropertySetAgainError(Exception):
     def __str__(self):
         return "Property cannot be set more than once"
@@ -143,7 +146,7 @@ class InvalidPropertyValue(Exception):
         self.value = value
     def __str__(self):
         return "Property cannot be set to invalid value '%s'" % self.value
-    
+
 
 class Property(object):
     def __init__(self, **kwargs):
@@ -269,6 +272,14 @@ def cmdmain(argv):
     try:
         main(argv)
         logging.shutdown()
+    except plugins.PluginNoMatch, e:
+        logging.shutdown()
+        print e
+        sys.exit(1)
+    except plugins.AmbigousPluginDetection, e:
+        logging.shutdown()
+        print e
+        sys.exit(1)
     except CommandLineError, e:
         logging.shutdown()
         print e

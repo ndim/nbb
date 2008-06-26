@@ -5,40 +5,8 @@ AT_TESTED([nbb])
 
 dnl ===================================================================
 
-AT_SETUP([nbb config: no VCS repository type])
-AT_KEYWORDS([nbb vcs config])
-AT_CHECK([mkdir test.foo && cd test.foo])
-AT_DATA([test.foo/configure.ac], [dnl
-AC[_]INIT(nbb-test-foo, 1.2.3, invalid@invalid.invalid)
-AC[_]OUTPUT
-])
-AT_CHECK([echo "$PWD/test.foo" > expout
-cd test.foo && nbb config srcdir], [0], [expout])
-AT_CHECK([rm -rf test.foo])
-AT_CLEANUP()
-
-dnl ===================================================================
-
-AT_SETUP([nbb config: bzr AND git ambigous repository])
-AT_KEYWORDS([nbb vcs bzr git config])
-AT_CHECK([mkdir test.bzrgit && cd test.bzrgit])
-AT_CHECK([cd test.bzrgit && bzr init && bzr nick testnick])
-AT_CHECK([cd test.bzrgit && git init], [0],
-[Initialized empty Git repository in .git/
-])
-AT_DATA([test.bzrgit/configure.ac], [dnl
-AC[_]INIT(nbb-test-bzr, 1.2.3, invalid@invalid.invalid)
-AC[_]OUTPUT
-])
-AT_CHECK([echo "$PWD/test.bzrgit" > expout
-cd test.bzrgit && nbb config srcdir], [0], [expout])
-AT_CHECK([rm -rf test.bzrgit])
-AT_CLEANUP()
-
-dnl ===================================================================
-
 AT_SETUP([nbb config: git defaults])
-AT_KEYWORDS([nbb vcs git config])
+AT_KEYWORDS([nbb git config])
 AT_CHECK([mkdir test.git && cd test.git])
 AT_CHECK([cd test.git && git init], [0],
 [Initialized empty Git repository in .git/

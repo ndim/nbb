@@ -1,0 +1,125 @@
+dnl ===================================================================
+
+AT_COPYRIGHT([Copyright (C) 2008 Hans Ulrich Niedermann])
+AT_TESTED([nbb])
+
+dnl ===================================================================
+
+AT_SETUP([nbb detect-vcs: no VCS repository type])
+AT_KEYWORDS([nbb detect vcs])
+AT_CHECK([mkdir test.foo && cd test.foo])
+AT_CHECK([echo "Unknown VCS source tree type: '$PWD/test.foo'" > expout
+cd test.foo && nbb detect-vcs], [1], [expout])
+AT_CHECK([rm -rf test.foo])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb detect-vcs: git detection ])
+AT_KEYWORDS([nbb detect vcs git])
+AT_CHECK([mkdir test.git && cd test.git])
+AT_CHECK([cd test.git && git init], [0],
+[Initialized empty Git repository in .git/
+])
+AT_CHECK([echo "VCS: git $PWD/test.git" > expout
+cd test.git && nbb detect-vcs], [0], [expout])
+AT_CHECK([rm -rf test.git])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb detect-vcs: bzr detection ])
+AT_KEYWORDS([nbb detect vcs bzr])
+AT_CHECK([mkdir test.bzr && cd test.bzr])
+AT_CHECK([cd test.bzr && bzr init])
+AT_CHECK([echo "VCS: bzr $PWD/test.bzr" > expout
+cd test.bzr && nbb detect-vcs], [0], [expout])
+AT_CHECK([rm -rf test.bzr])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb detect-vcs: bzr AND git ambigous repository])
+AT_KEYWORDS([nbb detect vcs bzr git])
+AT_CHECK([mkdir test.bzrgit && cd test.bzrgit])
+AT_CHECK([cd test.bzrgit && bzr init && bzr nick testnick])
+AT_CHECK([cd test.bzrgit && git init], [0],
+[Initialized empty Git repository in .git/
+])
+AT_CHECK([echo "Ambigous VCS types detected for '$PWD/test.bzrgit':
+  VCS type  Branch name
+  git       master
+  bzr       testnick" > expout
+cd test.bzrgit && nbb detect-vcs], [1], [expout])
+AT_CHECK([rm -rf test.bzrgit])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb detect-bs: automake detection ])
+AT_KEYWORDS([nbb detect bs automake])
+AT_CHECK([mkdir test.git && cd test.git])
+AT_CHECK([cd test.git && git init], [0],
+[Initialized empty Git repository in .git/
+])
+AT_DATA([test.git/configure.ac], [dnl
+AC[_]INIT(nbb-test-git, 1.2.3, invalid@invalid.invalid)
+AC[_]OUTPUT
+])
+AT_CHECK([echo "BS: automake $PWD/test.git" > expout
+cd test.git && nbb detect-bs], [0], [expout])
+AT_CHECK([rm -rf test.git])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb detect-bs: scons detection])
+AT_KEYWORDS([nbb detect bs scons])
+AT_CHECK([mkdir test.git && cd test.git])
+AT_CHECK([cd test.git && git init], [0],
+[Initialized empty Git repository in .git/
+])
+AT_DATA([test.git/SConstruct], [dnl
+# Test
+])
+AT_CHECK([echo "BS: scons $PWD/test.git" > expout
+cd test.git && nbb detect-bs], [0], [expout])
+AT_CHECK([rm -rf test.git])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb detect-bs: automake AND scons detection ])
+AT_KEYWORDS([nbb detect bs scons automake])
+AT_CHECK([mkdir test.git && cd test.git])
+AT_CHECK([cd test.git && git init], [0],
+[Initialized empty Git repository in .git/
+])
+AT_DATA([test.git/configure.ac], [dnl
+AC[_]INIT(nbb-test-git, 1.2.3, invalid@invalid.invalid)
+AC[_]OUTPUT
+])
+AT_DATA([test.git/SConstruct], [dnl
+# Test
+])
+AT_CHECK([echo "Ambigous BS types detected for '$PWD/test.git':
+  automake
+  scons" > expout
+cd test.git && nbb detect-bs], [1], [expout])
+AT_CHECK([rm -rf test.git])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb detect-bs: no BS detection])
+AT_KEYWORDS([nbb detect bs])
+AT_CHECK([mkdir test.git && cd test.git])
+AT_CHECK([cd test.git && git init], [0],
+[Initialized empty Git repository in .git/
+])
+AT_CHECK([echo "Unknown BS source tree type: '$PWD/test.git'" > expout
+cd test.git && nbb detect-bs], [1], [expout])
+AT_CHECK([rm -rf test.git])
+AT_CLEANUP()
+
+dnl ===================================================================

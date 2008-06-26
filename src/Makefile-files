@@ -10,6 +10,7 @@ nbblib_PYTHON += src/nbblib/bs.py
 nbblib_PYTHON += src/nbblib/commands.py
 nbblib_PYTHON += src/nbblib/main.py
 nbblib_PYTHON += src/nbblib/plugins.py
+nbblib_PYTHON += src/nbblib/newplugins.py
 nbblib_PYTHON += src/nbblib/progutils.py
 nbblib_PYTHON += src/nbblib/vcs.py
 

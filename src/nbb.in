@@ -18,8 +18,9 @@ import logging # since python 2.3
 
 # funcName: Since python 2.5
 # format="%(filename)s:%(lineno)d:%(funcName)s:"
-logging.basicConfig(level = logging.DEBUG,
-                    format = "%(levelname)s: %(message)s",
+logging.basicConfig(format = "%(levelname)s: %(message)s",
+                    # level = logging.DEBUG,
+                    level = logging.WARNING,
                     stream = sys.stderr)
 if False:
    logging.debug("xxx debug")
@@ -42,17 +43,20 @@ if __name__ == '__main__':
          sys.path = path
          try:
             import nbblib
-            #print "nbblib.PACKAGE_VERSION", nbblib.PACKAGE_VERSION
-            #print "PACKAGE_VERSION", PACKAGE_VERSION
+            logging.debug("nbb.PACKAGE_VERSION %s, nbblib.PACKAGE_VERSION %s",
+                          PACKAGE_VERSION, nbblib.PACKAGE_VERSION)
             assert(nbblib.PACKAGE_VERSION == PACKAGE_VERSION)
             lib_found = True
             break
          except AssertionError, e:
+            logging.debug("Assertion error", exc_info=True)
             sys.path = orig_path
          except ImportError, e:
+            logging.debug("Import error", exc_info=True)
             sys.path = orig_path
    if not lib_found:
-      sys.stderr.write("nbb: Fatal: Could not load nbblib.\n")
+      logging.error("nbb: Fatal: Could not load nbblib.")
+      logging.shutdown()
       sys.exit(3)
    import nbblib.main
    nbblib.main.cmdmain(sys.argv)

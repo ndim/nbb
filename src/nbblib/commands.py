@@ -1,12 +1,13 @@
 import os
 import sys
+import logging
 
 
-from nbblib.package import *
-from nbblib.plugins import *
-from nbblib.progutils import *
-from nbblib.vcs import *
-from nbblib.bs import *
+import nbblib.package as package
+import nbblib.newplugins as plugins
+import nbblib.progutils as progutils
+import nbblib.vcs as vcs
+import nbblib.bs as bs
 
 
 def adjust_doc(doc):
@@ -65,7 +66,7 @@ class Command(object):
         *args are the arguments from the command line
         **kwargs are additional parameters from within the program
     """
-    __metaclass__ = GenericPluginMeta
+    __metaclass__ = plugins.GenericPluginMeta
 
     usage = ''
 
@@ -141,30 +142,67 @@ class InternalConfigCommand(Command):
     name = 'internal-config'
     summary = 'print internal program configuration'
     def run(self):
-        print "Source tree types:",  ", ".join(VCSourceTree.plugins.keys())
-        print "Build system types:", ", ".join(BSSourceTree.plugins.keys())
+        print "Source tree types:",  ", ".join(vcs.VCSourceTree.plugins.keys())
+        print "Build system types:", ", ".join(bs.BSSourceTree.plugins.keys())
         print "Commands:",           ", ".join(Command.plugins.keys())
 
 
 class SourceClassCommand(Command):
     """Base class for commands acting on source trees"""
+    name = None # abstract command class
     def __init__(self, *args, **kwargs):
         super(SourceClassCommand, self).__init__(*args, **kwargs)
+
         context = kwargs['context']
         srcdir = os.getcwd()
         absdir = os.path.abspath(srcdir)
-        self.vcs_sourcetree = VCSourceTree.detect(context, absdir)
-        if context.verbose:
-            print "vcs_sourcetree", str(self.vcs_sourcetree)
-        assert(self.vcs_sourcetree)
+
+        self.vcs_sourcetree = vcs.VCSourceTree.detect(context, absdir)
+        logging.debug("vcs_sourcetree %s", self.vcs_sourcetree)
+
+        self.bs_sourcetree = bs.BSSourceTree.detect(context,
+                                                    self.vcs_sourcetree)
+        logging.debug("bs_sourcetree %s", self.bs_sourcetree)
+
         cfg = self.vcs_sourcetree.config
-        self.bs_sourcetree = BSSourceTree.detect(self.vcs_sourcetree, context)
-        if context.verbose:
-            print "bs_sourcetree", str(self.bs_sourcetree)
-            print "CONFIG", cfg
-            print " ", "srcdir", cfg.srcdir
-            print " ", "builddir", cfg.builddir
-            print " ", "installdir", cfg.installdir
+        for x in ('srcdir', 'builddir', 'installdir'):
+            logging.info("CONFIG %s %s", x, getattr(cfg, x))
+
+
+class DetectCommand(Command):
+    name = None
+    def __init__(self, *args, **kwargs):
+        super(DetectCommand, self).__init__(*args, **kwargs)
+        self.context = kwargs['context']
+        self.srcdir = os.getcwd()
+        self.absdir = os.path.abspath(self.srcdir)
+    def validate_args(self, *args, **kwargs):
+        pass
+
+
+class DetectVCSCommand(DetectCommand):
+    name = "detect-vcs"
+    summary = "detect source tree VCS"
+    def __init__(self, *args, **kwargs):
+        super(DetectVCSCommand, self).__init__(*args, **kwargs)
+        self.vcs_sourcetree = vcs.VCSourceTree.detect(self.context, self.absdir)
+        logging.debug("vcs_sourcetree %s", self.vcs_sourcetree)
+    def run(self):
+        print 'VCS:', self.vcs_sourcetree.name, self.vcs_sourcetree.tree_root
+
+
+class DetectBSCommand(DetectCommand):
+    name = "detect-bs"
+    summary = "detect source tree BS"
+    def __init__(self, *args, **kwargs):
+        super(DetectBSCommand, self).__init__(*args, **kwargs)
+        self.vcs_sourcetree = vcs.VCSourceTree.detect(self.context, self.absdir)
+        logging.debug("vcs_sourcetree %s", self.vcs_sourcetree)
+        self.bs_sourcetree = bs.BSSourceTree.detect(self.context,
+                                                    self.vcs_sourcetree)
+        logging.debug("bs_sourcetree %s", self.bs_sourcetree)
+    def run(self):
+        print 'BS:', self.bs_sourcetree.name, self.bs_sourcetree.tree_root
 
 
 class BuildTestCommand(SourceClassCommand):
@@ -209,8 +247,8 @@ class MakeCommand(SourceClassCommand):
         pass
     def run(self):
         os.chdir(self.bs_sourcetree.config.builddir)
-        prog_run(["make"] + list(self.args),
-                 self.context)
+        progutils.prog_run(["make"] + list(self.args),
+                           self.context)
 
 
 class ConfigCommand(SourceClassCommand):
@@ -267,7 +305,7 @@ class NBB_Command(object):
             except CommandLineError, e:
                 print "%(prog)s: Fatal:" % context, e
                 sys.exit(2)
-            except ProgramRunError, e:
+            except progutils.ProgramRunError, e:
                 print "%(prog)s: Fatal:" % context, e
                 print "Program aborted."
         else:

@@ -3,10 +3,9 @@ import logging
 import urlparse
 
 from nbblib.package import *
-from nbblib.plugins import *
 from nbblib.progutils import *
 
-from nbblib import newplugins
+from nbblib import newplugins as plugins
 
 
 class AbstractConfig(object):
@@ -34,66 +33,79 @@ class AbstractConfig(object):
 # VCS Source Tree plugin system
 ########################################################################
 
-class NotAVCSourceTree(Exception):
-    pass
-
-
-class AmbigousVCSource(Exception):
-    def __init__(self, srcdir, matches):
-        super(AmbigousVCSource, self).__init__()
+class NotAVCSourceTree(plugins.PluginNoMatch):
+    def __init__(self, srcdir):
+        super(NotAVCSourceTree, self).__init__()
         self.srcdir = srcdir
-        self.matches = matches
     def __str__(self):
-        fmt = "  %-9s %-15s %s"
-        def strmatch(m):
-            return fmt % (m.name, m.branch_name(), m.tree_root())
-        alist = ([fmt % ('VCS Type', 'Branch Name', 'Source tree root')] +
-                 [fmt % (m.name, m.branch_name(), m.tree_root()) for m in self.matches])
-        return ("More than one source tree VCS type detected for '%s':\n#%s"
-                % (self.srcdir, '\n '.join(alist)))
+        return "Unknown VCS source tree type: %s" % repr(self.srcdir)
 
 
-class VCSourceTree(newplugins.GenericDetectPlugin):
+class AmbigousVCSDetection(plugins.AmbigousPluginDetection):
+    def __init__(self, matches, cls, context, srcdir):
+        super(AmbigousVCSDetection, self).__init__(matches, cls, context)
+        self.srcdir = srcdir
+    def __str__(self):
+        # We possibly need to re-add m.tree_root here again soon
+        alist = [('VCS type', 'Branch name', )]
+        alist.extend(((name, m.branch_name, )
+                      for name, m in self.matches.iteritems()))
+        table = "\n".join(["  %-9s %s" % a for a in alist])
+        return "Ambigous VCS types detected for %s:\n%s" % (repr(self.srcdir), table)
+
+
+class VCSourceTree(plugins.GenericDetectPlugin):
     """
     Mount point for plugins which refer to actions that can be performed.
 
-    Plugins implementing this reference should provide the following
+    Plugins implementing this reference must provide the following
     interface:
 
     name  attribute
         The text to be displayed, describing the version control system
-    __init__  function
-        Must raise NotAVCSourceTree() if it is not a VCS source tree
+    __init__
+        Must "raise self.no_match_exception()" if it does not match.
+    and the other abstract methods below
     """
-    __metaclass__ = GenericPluginMeta
-    no_match_exception = PluginNoMatch
-    ambigous_match_exception = AmbigousPluginDetection
+    __metaclass__ = plugins.GenericPluginMeta
+    no_match_exception = NotAVCSourceTree
+    ambigous_match_exception = AmbigousVCSDetection
 
     @classmethod
-    def validate(cls, obj, *args, **kwargs):
-        srcdir = args[0]
-        return obj.tree_root() == srcdir
+    def validate(cls, obj, srcdir):
+        logging.debug("cls %s", cls)
+        logging.debug("obj %s", obj)
+        logging.debug("srcdir %s", srcdir)
+        return obj.tree_root == srcdir
 
     def get_config(self):
         """Get configuration object which determines builddir etc"""
-        return AbstractConfig(self.tree_root(), self.branch_name())
+        return AbstractConfig(self.tree_root, self.branch_name)
     config = property(get_config)
 
-    def tree_root(self):
+    def _get_tree_root(self):
         """Get absolute path to source tree root"""
         raise NotImplementedError()
 
-    def branch_name(self):
+    def get_tree_root(self):
+        return self._get_tree_root()
+    tree_root = property(get_tree_root)
+
+    def _get_branch_name(self):
         """Return name identifying the branch"""
         raise NotImplementedError()
+    def get_branch_name(self):
+        """Return name identifying the branch"""
+        return self._get_branch_name()
+    branch_name = property(get_branch_name)
 
     def __str__(self):
         return repr(self)
 
     def __repr__(self):
         return "<%s(%s, %s)>" % (self.__class__.__name__,
-                                 repr(self.tree_root()),
-                                 repr(self.branch_name()))
+                                 repr(self.tree_root),
+                                 repr(self.branch_name))
 
 
 ########################################################################
@@ -109,20 +121,20 @@ class GitSourceTree(VCSourceTree):
         os.chdir(srcdir)
         if "true" != prog_stdout(["git", "rev-parse",
                                   "--is-inside-work-tree"]):
-            raise NotAVCSourceTree()
+            raise self.no_match_exception(srcdir)
         reldir = prog_stdout(["git", "rev-parse", "--show-cdup"])
         if reldir:
             os.chdir(reldir)
         self.__tree_root = os.getcwd()
 
     def get_config(self):
-        return GitConfig(self.tree_root(), self.branch_name())
+        return GitConfig(self.tree_root, self.branch_name)
     config = property(get_config)
 
-    def tree_root(self):
+    def _get_tree_root(self):
         return self.__tree_root
 
-    def branch_name(self):
+    def _get_branch_name(self):
         bname = prog_stdout(["git", "symbolic-ref", "HEAD"])
         refs,heads,branch = bname.split('/')
         assert(refs=='refs' and heads=='heads')
@@ -178,9 +190,9 @@ class BzrSourceTree(VCSourceTree):
             import bzrlib.workingtree
             wt,b = bzrlib.workingtree.WorkingTree.open_containing(srcdir)
         except bzrlib.errors.NotBranchError:
-            raise NotAVCSourceTree()
+            raise self.no_match_exception(srcdir)
         except ImportError:
-            raise NotAVCSourceTree()
+            raise self.no_match_exception(srcdir)
         self.wt = wt
         #print "wt:", wt
         #print "wt:", dir(wt)
@@ -191,13 +203,13 @@ class BzrSourceTree(VCSourceTree):
         #print "wt.branch.base:", wt.branch.base
         #print "wt.branch.basis_tree:", wt.branch.basis_tree()
 
-    def tree_root(self):
+    def _get_tree_root(self):
         proto,host,path,some,thing = urlparse.urlsplit(self.wt.branch.base)
         assert(proto == "file" and host == "")
         assert(some == "" and thing == "")
         return os.path.abspath(path)
 
-    def branch_name(self):
+    def _get_branch_name(self):
         return self.wt.branch.nick
 
 

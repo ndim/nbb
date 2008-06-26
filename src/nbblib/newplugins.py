@@ -1,6 +1,20 @@
-"""Usage of newplugins module:
+"""\
+newplugins.py - generic plugin system
+
+Basic plugin architecture (metaclass tricks) by Marty Alchin from
+http://gulopine.gamemusic.org/2008/jan/10/simple-plugin-framework/
+
+GenericPluginMeta slightly modified to
+ - store plugins as dict
+ - support plugin class hierarchies
+Extended by GenericDetectPlugin to
+ - support auto-detection of the adequate plugin
+
+Example usage of the newplugins module:
 
 np = __import__(newplugins)
+
+Example non-auto-detection plugin:
 
 class NonDetectPluginType(object):
     __metaclass__ = np.GenericPluginMeta
@@ -10,8 +24,16 @@ class PluginA(NonDetectPluginType):
 class PluginB(NonDetectPluginType):
     name = "PB"
 
+Example auto-detection plugin:
+
 class MyPluginType(np.GenericDetectPlugin):
     __metaclass__ = np.GenericPluginMeta
+
+    # The calling convention for constructor
+    # detect(context, <mystuff...>)
+    # is defined here, and the same <mystuff...> is used
+    # to construct the exceptions.
+
     [no_match_exception = ...]
     [ambigous_match_exception = ...]
     [
@@ -25,13 +47,13 @@ class MyPluginA(MyPluginType):
     def __init__(self, context):
         super(MyPluginA, self).__init__(self, context)
         if not some_detection_successful:
-            raise np.PluginNoMatch()
+            raise self.no_match_exception()
 class MyPluginB(MyPluginType):
     name = "MB"
     def __init__(self, context):
         super(MyPluginB, self).__init__(self, context)
         if not other_detection_successful:
-            raise np.PluginNoMatch()
+            raise self.no_match_exception()
 
 """
 
@@ -92,15 +114,6 @@ class PluginDict(dict):
             raise DuplicatePluginName()
         else:
             super(PluginDict, self).__setitem__(key, value)
-
-
-########################################################################
-# Generic plugin system
-########################################################################
-# Plugin architecture (metaclass tricks) by Marty Alchin from
-# http://gulopine.gamemusic.org/2008/jan/10/simple-plugin-framework/
-# Slightly modified go store plugins as dict.
-########################################################################
 
 
 class GenericPluginMeta(type):

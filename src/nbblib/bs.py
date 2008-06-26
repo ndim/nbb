@@ -6,69 +6,53 @@
 import os
 import logging
 
-from nbblib.plugins import *
-from nbblib.progutils import *
+from nbblib import progutils
+
+from nbblib import newplugins as plugins
 
 
-class NotABSSourceTree(Exception):
+class NotABSSourceTree(plugins.PluginNoMatch):
     def __init__(self, vcs_tree):
         super(NotABSSourceTree, self).__init__()
         self.vcs_tree = vcs_tree
     def __str__(self):
-        return ("Source tree build system type for '%s' not detected"
-                % (self.vcs_tree,))
+        return "Unknown BS source tree type: %s" % repr(self.vcs_tree.tree_root)
 
 
-class AmbigousBSSource(Exception):
-    def __init__(self, srcdir, matches):
-        super(AmbigousBSSource, self).__init__()
-        self.srcdir = srcdir
-        self.matches = matches
+class AmbigousBSDetection(plugins.AmbigousPluginDetection):
+    def __init__(self, matches, cls, context, vcs_tree):
+        super(AmbigousBSDetection, self).__init__(matches, cls, context)
+        self.vcs_tree = vcs_tree
     def __str__(self):
-        fmt = "  %-9s %s"
-        def strmatch(m):
-            return fmt % (m.name, m.tree_root())
-        alist = [fmt % ('VCS Type', 'Source tree root')]
-        alist.extend(map(strmatch, self.matches))
-        return ("More than one source tree VCS type detected for '%s':\n#%s"
-                % (self.srcdir, '\n '.join(alist)))
+        alist = self.matches.keys()
+        alist.sort()
+        return "Ambigous BS types detected for %s:\n  %s" % (repr(self.vcs_tree.tree_root),
+                                                         '\n  '.join(alist))
 
 
-class BSSourceTree(object):
-    __metaclass__ = GenericPluginMeta
-
-    def __init__(self, context):
-        super(BSSourceTree, self).__init__()
-        self.context = context
+class BSSourceTree(plugins.GenericDetectPlugin):
+    __metaclass__ = plugins.GenericPluginMeta
+    no_match_exception = NotABSSourceTree
+    ambigous_match_exception = AmbigousBSDetection
 
     @classmethod
-    def detect(cls, vcs_tree, context):
-        """Find BS tree type and return it"""
-        if len(cls.plugins) < 1:
-            raise NoPluginsRegistered(cls)
-        #logging.debug("CLASS %s", cls)
-        matches = PluginDict()
-        for key, klass in cls.plugins.iteritems():
-            try:
-                t = klass(vcs_tree, context)
-                if t.tree_root() == vcs_tree.tree_root():
-                    #logging.debug("KLASS %s", klass)
-                    matches[key] = t
-            except NotABSSourceTree, e:
-                pass
-        if len(matches) > 1:
-            raise ("More than one source tree BS type detected for '%s': %s"
-                   % (vcs_tree, ", ".join([str(x) for x in matches])))
-        elif len(matches) < 1:
-            raise NotABSSourceTree(vcs_tree)
-        return matches[matches.keys()[0]]
+    def validate(cls, obj, vcs_tree):
+        logging.debug("BSSourceTree.validate(%s, %s, %s) %s %s",
+                      cls, obj, vcs_tree,
+                      repr(obj.tree_root), repr(vcs_tree.tree_root))
+        return obj.tree_root == vcs_tree.tree_root
+
+
+    def get_tree_root(self): return self._get_tree_root()
+    tree_root = property(get_tree_root)
+
 
     def __str__(self):
         return "BS-Source-Tree(%s, %s)" % (self.name,
-                                           repr(self.tree_root()))
+                                           repr(self.tree_root))
 
     # Abstract methods
-    def tree_root(self): raise NotImplementedError()
+    def _get_tree_root(self): raise NotImplementedError()
     def init(self): raise NotImplementedError()
     def configure(self): raise NotImplementedError()
     def build(self): raise NotImplementedError()
@@ -77,9 +61,9 @@ class BSSourceTree(object):
 
 class AutomakeSourceTree(BSSourceTree):
     name = 'automake'
-    def __init__(self, vcs_tree, context):
+    def __init__(self, context, vcs_tree):
         super(AutomakeSourceTree, self).__init__(context)
-        srcdir = vcs_tree.tree_root()
+        srcdir = vcs_tree.tree_root
         self.config = vcs_tree.config
         flag = False
         for f in [ os.path.join(srcdir, 'configure.ac'),
@@ -89,15 +73,15 @@ class AutomakeSourceTree(BSSourceTree):
                 flag = True
                 break
         if not flag:
-            raise NotABSSourceTree(vcs_tree)
+            raise self.no_match_exception(vcs_tree)
 
-    def tree_root(self):
+    def _get_tree_root(self):
         return self.config.srcdir
 
     def init(self):
         """'autoreconf'"""
-        prog_run(["autoreconf", "-v", "-i", "-s", self.config.srcdir],
-                 self.context)
+        progutils.prog_run(["autoreconf", "-v", "-i", "-s", self.config.srcdir],
+                           self.context)
 
     def configure(self):
         """'configure --prefix'"""
@@ -106,10 +90,10 @@ class AutomakeSourceTree(BSSourceTree):
         builddir = self.config.builddir
         if not os.path.exists(builddir): os.makedirs(builddir)
         os.chdir(builddir)
-        prog_run(["%s/configure" % self.config.srcdir,
-                  "--prefix=%s" % self.config.installdir,
-                  "--enable-maintainer-mode",
-                  ], self.context)
+        progutils.prog_run(["%s/configure" % self.config.srcdir,
+                            "--prefix=%s" % self.config.installdir,
+                            "--enable-maintainer-mode",
+                            ], self.context)
 
     def build(self):
         """'make'"""
@@ -117,7 +101,7 @@ class AutomakeSourceTree(BSSourceTree):
         if not os.path.exists(os.path.join(builddir, 'config.status')):
             self.configure()
         os.chdir(builddir)
-        prog_run(["make", ], self.context)
+        progutils.prog_run(["make", ], self.context)
 
     def install(self):
         """'make install'"""
@@ -125,7 +109,26 @@ class AutomakeSourceTree(BSSourceTree):
         if not os.path.exists(os.path.join(builddir, 'config.status')):
             self.configure()
         os.chdir(builddir)
-        prog_run(["make", "install", "INSTALL=/usr/bin/install -p"],
-                 self.context)
+        progutils.prog_run(["make", "install", "INSTALL=/usr/bin/install -p"],
+                           self.context)
 
+
+class SconsSourceTree(BSSourceTree):
+    name = 'scons'
+    def __init__(self, context, vcs_tree):
+        super(SconsSourceTree, self).__init__(context)
+        srcdir = vcs_tree.tree_root
+        self.config = vcs_tree.config
+        flag = False
+        for f in [ os.path.join(srcdir, 'SConstruct'),
+                   ]:
+            if os.path.exists(f):
+                flag = True
+                break
+        if not flag:
+            raise self.no_match_exception(vcs_tree)
+        self.__tree_root = srcdir
+
+    def _get_tree_root(self):
+        return self.__tree_root
 
