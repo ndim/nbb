@@ -1,3 +1,8 @@
+"""\
+nbblib.commands - cmdline command infrastructure and implementation
+Copyright (C) 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
+"""
+
 import os
 import sys
 import logging

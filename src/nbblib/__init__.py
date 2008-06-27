@@ -5,7 +5,7 @@ import nbblib.package as package
 import nbblib.progutils as progutils
 import nbblib.vcs as vcs
 
-from package import PACKAGE_VERSION
+from nbblib.package import PACKAGE_VERSION
 
 __all__ = ['bs', 'commands',
            'package', 'plugins',

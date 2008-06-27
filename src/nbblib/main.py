@@ -28,6 +28,7 @@ DONE:
    and then check that the Python environment is actually compatible.
    @classmethod -> Python 2.4
    new style classes -> Python 2.2
+ * Add pydoc docs.
 
 TODO: (to get git-amb equivalent functionality)
  * Fine-tune init, configure, build, install commands with knowledge
@@ -45,7 +46,6 @@ TODO: (Large list)
  * Use declarations for command line parsing, and help text generation.
    Use optparse stuff for both global params and extra optparse stuff
    for each command?
- * Add pydoc docs.
  * Add global --nick or similar option to determine the branch
    name to use for composing the pathes.
  * Find or implement @abstractmethod decorator.

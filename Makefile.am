@@ -1,5 +1,7 @@
 nbblibdir = $(pythondir)/nbblib
 
+ALL_LOCAL =
+
 CLEANFILES =
 BUILT_SOURCES =
 EXTRA_DIST =
@@ -32,6 +34,8 @@ include build-helpers/package-version.mk
 
 include Makefile-files
 include src/Makefile-files
+
+all-local: $(ALL_LOCAL)
 
 if HAVE_NDIM_MAN2TXT
 .man.txt:

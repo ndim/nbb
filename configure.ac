@@ -24,6 +24,10 @@ AM_PATH_PYTHON([2.4], [:],
                [AC_MSG_ERROR([nbb does require Python >= 2.4])])
 AM_CONDITIONAL([HAVE_PYTHON], [ test "x$PYTHON" != "x:" ])
 
+AC_ARG_VAR([PYDOC], [pydoc python documentation tool])
+AC_PATH_PROG([PYDOC], [pydoc], [no])
+AM_CONDITIONAL([HAVE_PYDOC], [test "x$PYDOC" != "xno"])
+
 ########################################################################
 
 m4_pattern_forbid([NDIM_REQUIRE_POSIX_SH])dnl

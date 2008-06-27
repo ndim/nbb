@@ -15,7 +15,7 @@ nbblib_PYTHON += src/nbblib/vcs.py
 
 # Put all python source files, whether changed or verbatim,
 # into builddir, such that we can run tests in builddir.
-all-local: all-local-nbblib
+ALL_LOCAL += all-local-nbblib
 all-local-nbblib:
 	@for f in $(nbblib_PYTHON); do \
 		if test -f "$(top_builddir)/$$f" && test "$(top_srcdir)/$$f" -ot "$(top_builddir)/$$f"; then :; else \
@@ -23,6 +23,22 @@ all-local-nbblib:
 			cp -f "$(top_srcdir)/$$f" "$(top_builddir)/$$f"; \
 		fi; \
 	done
+
+if HAVE_PYDOC
+ALL_LOCAL += all-local-nbblib-pydoc
+all-local-nbblib-pydoc: all-local-nbblib
+	@cd src && \
+	echo "Entering directory '$$PWD'"; \
+	echo $(PYDOC) -w "nbblib"; \
+	$(PYDOC) -w "nbblib"; \
+	for modfile in nbblib/*.py; do \
+		mod="nbblib.$$(basename "$$modfile" .py)"; \
+		test "$$mod" = "nbblib.__init__" && continue; \
+		echo $(PYDOC) -w "$${mod}"; \
+		$(PYDOC) -w "$${mod}"; \
+	done; \
+	echo "Leaving directory '$$PWD'";
+endif
 
 bin_SCRIPTS += src/nbb
 CLEANFILES  += src/nbb
