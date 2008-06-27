@@ -37,7 +37,17 @@ all-local-nbblib-pydoc: all-local-nbblib
 		echo $(PYDOC) -w "$${mod}"; \
 		$(PYDOC) -w "$${mod}"; \
 	done; \
-	echo "Leaving directory '$$PWD'";
+	echo "Leaving directory '$$PWD'"
+	rm -rf pydoc
+	mkdir -p pydoc
+	mv src/nbblib*.html pydoc/
+
+install-data-local:
+	$(INSTALL) -d -m 0755 $(DESTDIR)$(htmldir)
+	$(INSTALL) -m 0644 pydoc/*.html $(DESTDIR)$(htmldir)/
+
+uninstall-local:
+	rm -f $(DESTDIR)$(htmldir)/*.html
 endif
 
 bin_SCRIPTS += src/nbb
@@ -65,7 +75,7 @@ src/nbb: src/nbb.in $(nodist_nbblib_PYTHON) $(nbblib_PYTHON) Makefile
 
 endif
 
-clean-local: clean-local-nbblib
+clean-local: clean-local-nbblib clean-local-nbblib-pydoc
 clean-local-nbblib:
 	rm -f src/nbblib/*.pyc
 	@top_srcdir="$$(cd "$(top_srcdir)" > /dev/null 2>&1 && pwd)"; \
@@ -76,5 +86,8 @@ clean-local-nbblib:
 			rm -f "$(top_builddir)/$$f"; \
 		done; \
 	fi
+
+clean-local-nbblib-pydoc:
+	rm -rf pydoc
 
 # End of Makefile-files.
