@@ -45,7 +45,7 @@ if HAVE_NDIM_MAN2TXT
 endif
 
 # Requires git 1.5 to work properly.
-GIT = git
+if HAVE_GIT
 tag:
 	test -d "$(top_srcdir)/.git"
 	@cd "$(top_srcdir)" && $(GIT) status;:
@@ -76,7 +76,9 @@ tag:
 	msgfile="$$PWD/TAG-MESSAGE"; \
 	cd "$(top_srcdir)" && $(GIT) tag -s -F "$$msgfile" "v$(TAG)"; \
 	rm -f "$$msgfile"
+endif
 
+if HAVE_RSYNC
 UPLOAD_DIR = upload-dir
 ALL_UPLOAD_FILES = $(UPLOAD_FILES) $(distdir).tar.bz2
 upload: $(UPLOAD_FILES) dist
@@ -88,6 +90,7 @@ upload: $(UPLOAD_FILES) dist
 	rsync -avz --delete "$(UPLOAD_DIR)/" $(RSYNC_HOST):$(RSYNC_DIR)/$(PACKAGE_TARNAME)/
 	rm -rf "$(UPLOAD_DIR)"
 	if test -d "$(top_srcdir)/.git"; then cd "$(top_srcdir)" && git push public master; fi
+endif
 
 clean-local:
 	rm -rf "$(UPLOAD_DIR)"

@@ -37,6 +37,33 @@ NDIM_DETECT_MAN2TXT()dnl
 
 ########################################################################
 
+AC_ARG_VAR([GIT], [git revision control system])
+AC_PATH_PROG([GIT], [git], [no])
+AM_CONDITIONAL([HAVE_GIT], [test "x$GIT" != "xno"])
+
+########################################################################
+
+AC_ARG_VAR([RSYNC], [rsync program for synchronizing files over a network])
+AC_PATH_PROG([RSYNC], [rsync], [no])
+AM_CONDITIONAL([HAVE_RSYNC], [test "x$RSYNC" != "xno"])
+
+########################################################################
+
+AC_ARG_VAR([BZR], [bzr revision control system])
+AC_PATH_PROG([BZR], [bzr], [no])
+
+########################################################################
+
+AC_ARG_VAR([SCONS], [scons build toold])
+AC_PATH_PROG([SCONS], [scons], [no])
+
+########################################################################
+
+AC_ARG_VAR([CMAKE], [cmake build toold])
+AC_PATH_PROG([CMAKE], [cmake], [no])
+
+########################################################################
+
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([GNUmakefile])
 AC_CONFIG_FILES([src/nbblib/package.py:src/nbblib/package.in])
