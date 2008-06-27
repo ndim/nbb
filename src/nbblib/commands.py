@@ -81,10 +81,12 @@ class Command(object):
         self.kwargs = kwargs
         self.context = kwargs['context']
 
+    @plugins.abstractmethod
     def run(self):
         """Run the command"""
-        raise NotImplementedError()
+        pass
 
+    # Candidate for abstractmethod
     def validate_args(self, *args, **kwargs):
         """Validate command line arguments"""
         print "Command: ", self.name

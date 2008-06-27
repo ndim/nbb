@@ -82,17 +82,19 @@ class VCSourceTree(plugins.GenericDetectPlugin):
         return AbstractConfig(self.tree_root, self.branch_name)
     config = property(get_config)
 
+    @plugins.abstractmethod
     def _get_tree_root(self):
         """Get absolute path to source tree root"""
-        raise NotImplementedError()
+        pass
 
     def get_tree_root(self):
         return self._get_tree_root()
     tree_root = property(get_tree_root)
 
+    @plugins.abstractmethod
     def _get_branch_name(self):
         """Return name identifying the branch"""
-        raise NotImplementedError()
+        pass
     def get_branch_name(self):
         """Return name identifying the branch"""
         return self._get_branch_name()

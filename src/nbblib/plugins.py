@@ -62,6 +62,7 @@ import sys
 import logging
 import types
 import functools
+import inspect
 
 
 class NoPluginsRegistered(Exception):
@@ -103,15 +104,13 @@ class AmbigousPluginDetection(Exception):
                                               self.kwargs)
 
 
-# Might be used later when we do class introspection looking for
-# abstract methods.
-class UNUSED_AbstractMethodsInConcreteClass(Exception):
+class AbstractMethodsInConcreteClass(Exception):
     def __init__(self, cls, methods):
         self.cls = cls
         self.methods = methods
     def __str__(self):
-        methods = "\n  ".join(self.methods)
-        return "Concrete class %s.%s must implement these methods:\n  %s" \
+        methods = " ".join((k for k,v in self.methods))
+        return "Class %s.%s must implement the %s abstract methods." \
             % (self.cls.__module__,
                self.cls.__name__,
                methods)
@@ -133,10 +132,7 @@ def abstractmethod(fun):
         # fun(self, *args, **kwargs)
         raise AbstractMethodError(name=fun.__name__,
                                   module=fun.__module__)
-    # We might add some introspection tool later, to be run
-    # in e.g. GenericPluginMeta.__init__(...), which makes sure
-    # that there are no abstract methods in a non-abstract class.
-    # f.abstract_method = True
+    f.abstract_method = True
     return f
 
 
@@ -169,6 +165,12 @@ class GenericPluginMeta(type):
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
             logging.debug("Registering %s together with %s", cls, cls.plugins)
+            def abstract_method_filter(member):
+                return hasattr(member, '__call__') \
+                    and hasattr(member, 'abstract_method')
+            ams = inspect.getmembers(cls, abstract_method_filter)
+            if ams:
+                raise AbstractMethodsInConcreteClass(cls, ams)
             cls.plugins[cls.name] = cls
         else:
             # This must be an abstract subclass of plugins.
