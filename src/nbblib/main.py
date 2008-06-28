@@ -150,28 +150,35 @@ class InvalidPropertyValue(Exception):
 
 
 class Property(object):
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
+        assert(len(args) == 0)
         if kwargs.has_key('default'):
             self.default = kwargs['default']
+        valid_kwargs = ('default',)
+        for kwa in kwargs.iterkeys():
+            assert(kwa in valid_kwargs)
+        self.name = "property-%08x" % hash(self)
     def __get__(self, instance, owner):
         # print "Property.__get__", instance, owner
-        if hasattr(self, 'value'):
-            return self.value
+        if hasattr(instance, self.name):
+            return getattr(instance, self.name)
         elif hasattr(self, 'default'):
             return self.default
         else:
             return None
     def __set__(self, instance, value):
         # print "Property.__set__", instance, value
-        if hasattr(self, 'value'):
+        if hasattr(instance, self.name):
             raise PropertySetAgainError()
         elif not self.isvalid(value):
             raise InvalidPropertyValue
         else:
-            self.value = self.convert(value)
+            setattr(instance, self.name, self.convert(value))
     def __str__(self):
-        if hasattr(self, 'value'):
-            return self.value
+        if hasattr(instance, self.name):
+            return getattr(instance, self.name)
+        elif hasattr(self, 'default'):
+            return '<property defaulting to %s>' % self.default
         else:
             return '<undefined property>'
     def isvalid(self, value):
