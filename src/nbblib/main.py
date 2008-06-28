@@ -212,6 +212,7 @@ class BoolProperty(Property):
     def isvalid(self, value):
         return (value in (True, False))
 
+
 class DryRunProperty(BoolProperty):
     def __init__(self):
         super(DryRunProperty, self).__init__(default=False)
