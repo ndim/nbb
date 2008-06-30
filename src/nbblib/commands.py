@@ -331,6 +331,13 @@ class ConfigCommand(SourceClassCommand):
 # Commands
 ########################################################################
 
+class UnknownCommand(Exception):
+    def __init__(self, cmd):
+        super(UnknownCommand, self).__init__()
+        self.cmd = cmd
+    def __str__(self):
+        return "Fatal: Unknown command '%(cmd)s'" % self.__dict__
+
 class NBB_Command(object):
     def __init__(self, cmd, cmdargs, context):
         if Command.plugins.has_key(cmd):
@@ -342,8 +349,8 @@ class NBB_Command(object):
                 sys.exit(2)
             except progutils.ProgramRunError, e:
                 print "%(prog)s: Fatal:" % context, e
-                print "Program aborted."
+                sys.exit(3)
         else:
-            print "Fatal: Unknown command '%s'" % cmd
-            raise NotImplementedError()
+            print "%(prog)s:" % context, UnknownCommand(cmd)
+            sys.exit(2)
 
