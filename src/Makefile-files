@@ -40,7 +40,7 @@ all-local-nbblib-pydoc: all-local-nbblib
 		mod="nbblib.$$(basename "$$modfile" .py)"; \
 		test "$$mod" = "nbblib.__init__" && mod="nbblib"; \
 		htmlfile="pydoc/$${mod}.html"; \
-		ls -l --full-time "$$htmlfile" "$$modfile"; \
+		: ls -l --full-time "$$htmlfile" "$$modfile"; \
 		: "Darn. Better let MAKE calculate the deps, perhaps?" ; \
                 rebuild="no"; \
 		if test -f "$$htmlfile"; then \
