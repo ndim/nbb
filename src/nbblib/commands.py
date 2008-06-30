@@ -119,9 +119,17 @@ class HelpCommand(Command):
     def _print_command_list(self):
         print "List of commands:"
         keys = Command.plugins.keys()
+        if not keys:
+            print "Error: No commands found."
+            sys.exit(2)
         keys.sort()
+        keys2 = Command.plugins.keys()
+	keys2.sort(lambda a,b: cmp(len(b),len(a)))
+	print "keys ", keys
+	print "keys2", keys2
+        fmt = "\t%%-%ds\t%%s" % len(keys2[0])
         for k in keys:
-           print "\t%-15s\t%s" % (k, Command.plugins[k].summary)
+           print fmt % (k, Command.plugins[k].summary)
 
     def _print_command_help(self, cmd):
         """print help for command cmd"""
