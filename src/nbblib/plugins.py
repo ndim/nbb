@@ -55,6 +55,8 @@ class MyPluginB(MyPluginType):
         if not other_detection_successful:
             raise self.no_match_exception()
 
+Ideas:
+ * Get rid of references to "context", and handle that in derived classes.
 """
 
 
