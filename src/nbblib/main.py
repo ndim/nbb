@@ -16,57 +16,6 @@ Features:
  * supports bzr branches (requires useful branch nick, TBD: bzr config ?)
  * does out-of-source-tree builds (in-source-tree-builds unsupported)
  * direct support for automake/autoconf based build systems
- * TBD: supports execution of user commands in source, build, install dirs
-
-DONE:
- * VCS config support ('git config', etc.)
- * Build system support: automake/autoconf
- * Merge stuff from Eclipse to src/own/nbb and vice versa.
- * Write test cases for init, configure, build, install.
- * Write test cases for all nbb commands.
- * Determine required feature sets (properties, new-style classes, etc.)
-   and then check that the Python environment is actually compatible.
-   @classmethod -> Python 2.4
-   new style classes -> Python 2.2
- * Add pydoc docs.
-
-TODO: (to get git-amb equivalent functionality)
- * Fine-tune init, configure, build, install commands with knowledge
-   gained with git-amb, especially the command interdependencies.
- * Implement *-sh and *-run commands.
-
-TODO: (Large list)
- * BS support: cmake, scons, ...
- * VCS support: SVN, darcs, hg, ...
- * Out-of-source builds for systems which require in-source-tree builds:
-   "cp -rl foo.src foo.build"?
- * General removal of redundancy in Python code.
- * Make sure the if cmp ... mv .. rm in make rules are correct and useful.
- * More declarative syntax elements in the Python code.
- * Use declarations for command line parsing, and help text generation.
-   Use optparse stuff for both global params and extra optparse stuff
-   for each command?
- * Add global --nick or similar option to determine the branch
-   name to use for composing the pathes.
- * Find or implement @abstractmethod decorator.
- * Test cases for proper handling of detecting (0, 1, >1) x (VCS, BS).
- * Unify detect() methods.
- * Store config in ${srcdir}/.nbb.conf instead of 'git config'?
-   More portable. bzr does not have a config interface, for example.
- * Model different "stages" of e.g. automake builds as distinct objects,
-   including proper dependency detectors, and stuff? OK, we're not going
-   to duplicate scons here.
- * BS autodetection might discover more than one BS instance of the same type?
- * Design nice user interface. Requirements:
-   * print top_srcdir, builddir, installdir. OK: 'config'
-   * start subshell in top_srcdir, builddir, installdir
-   * run 'autoreconf' type step. OK: 'init'
-   * run 'configure' type step. OK: 'configure'
-   * run 'make' type step. OK: 'build'
-   * run 'make install' type step. OK: 'install'
-   * run custom (make) commands. OK: 'make'
- * Bash syntax completion for that user interface.
- * Man page or something similar. Generate from help texts?
 
 TBD: Command line interface:
 
