@@ -1,6 +1,7 @@
 import os
 import logging
 import urlparse
+import itertools
 
 from nbblib import package
 from nbblib import progutils
@@ -46,9 +47,9 @@ class AmbigousVCSDetection(plugins.AmbigousPluginDetection):
         self.srcdir = srcdir
     def __str__(self):
         # We possibly need to re-add m.tree_root here again soon
-        alist = [('VCS type', 'Branch name', )]
-        alist.extend(((name, m.branch_name, )
-                      for name, m in self.matches.iteritems()))
+        alist = itertools.chain([('VCS type', 'Branch name', )],
+                                (((name, m.branch_name, )
+                                 for name, m in self.matches.iteritems())))
         table = "\n".join(["  %-9s %s" % a for a in alist])
         return "Ambigous VCS types detected for %s:\n%s" % (repr(self.srcdir), table)
 
