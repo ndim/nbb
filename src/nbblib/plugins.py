@@ -66,6 +66,7 @@ import inspect
 
 
 class NoPluginsRegistered(Exception):
+    """Raised when looking for plugins but none are registered"""
     def __init__(self, cls):
         super(NoPluginsRegistered, self).__init__()
         self.cls = cls
@@ -74,10 +75,12 @@ class NoPluginsRegistered(Exception):
 
 
 class DuplicatePluginName(Exception):
+    """Raised when another plugin tries to register the same name"""
     pass
 
 
 class PluginNoMatch(Exception):
+    """Raised when no registered plugin matches the given args"""
     def __init__(self, *args, **kwargs):
         super(PluginNoMatch, self).__init__()
         self.args = args
@@ -88,6 +91,7 @@ class PluginNoMatch(Exception):
 
 
 class AmbigousPluginDetection(Exception):
+    """Raised when more than one registered plugin matches the given args"""
     def __init__(self, matches, cls, context, *args, **kwargs):
         self.matches = matches
         self.cls = cls
@@ -105,6 +109,11 @@ class AmbigousPluginDetection(Exception):
 
 
 class AbstractMethodsInConcreteClass(Exception):
+    """Raised when an abstract method is detected in a non-abstract class
+
+    The method has been marked @abstractmethod in an ancestor, and must be
+    implemented if this class is not abstract itself.
+    """
     def __init__(self, cls, methods):
         self.cls = cls
         self.methods = methods
@@ -117,6 +126,7 @@ class AbstractMethodsInConcreteClass(Exception):
 
 
 class AbstractMethodError(Exception):
+    """Raised when an abstract method is called"""
     def __init__(self, name, module):
         self.name = name
         self.module = module
@@ -127,6 +137,18 @@ class AbstractMethodError(Exception):
 
 
 def abstractmethod(fun):
+    """The decorator for abstract methods in plugins
+
+    This decorator has two effects:
+     * If the abstract method should ever be called, it will raise
+       an AbstractMethodError.
+     * If the class the method is defined has GenericPluginMeta as
+       __metaclass__, __name__ is not None (i.e. it is a non-abstract
+       Plugin class), and the method has not been overwritten with a
+       method without @abstractmethod, there will be a
+       AbstractMethodsInConcreteClass at module loading time, i.e.
+       before the actual program is run!
+    """
     @functools.wraps(fun)
     def f(self, *args, **kwargs):
         # fun(self, *args, **kwargs)
@@ -152,6 +174,25 @@ class PluginDict(dict):
 
 
 class GenericPluginMeta(type):
+    """Simple plugin metaclass with named plugins
+
+    Simple usage:
+    >>> class Plugin(object):
+    ...     pass
+    ...
+    >>> class PluginA(Plugin):
+    ...     __name__ = 'a'
+    ...
+    >>> class PluginA(Plugin):
+    ...     __name__ = 'b'
+    ...
+    >>> print Plugin.plugins.keys()
+    ['a', 'b']
+
+    Advanced features:
+    You can add abstract subclasses of Plugin by giving them a __name__ = None,
+    define an @abstractmethod method in that abstract subclass, and much more.
+    """
     def __init__(cls, name, bases, attrs):
         logging.debug("META_INIT %s %s %s %s", cls, name, bases, attrs)
         if not hasattr(cls, 'plugins'):
@@ -178,7 +219,28 @@ class GenericPluginMeta(type):
 
 
 class GenericDetectPlugin(object):
+    """Advanced plugin class where the plugins detect whether they apply
+
+    Use it by defining a subclass with the proper properties and methods overwritten.
+
+    Example:
+    >>> class FooDetectPlugin(GenericDetectPlugin):
+    ...     @classmethod
+    ...     def validate(cls, obj, foo, bar):
+    ...         return cls.__name__ == 'A'
+    ... 
+    >>> class FooDetectPluginA(FooDetectPlugin):
+    ...     __name__ = 'A'
+    ... 
+    >>> class FooDetectPluginB(FooDetectPlugin):
+    ...     __name__ = 'B'
+    ... 
+    >>> FooDetectPlugin.detect('FOO', 'BAR')
+    """
+
+    """You may override this with a more plugin specific subclass of PluginNoMatch"""
     no_match_exception = PluginNoMatch
+    """You may override this with a more plugin specific subclass of AmbigousPluginDetection"""
     ambigous_match_exception = AmbigousPluginDetection
 
     def __init__(self, context):
@@ -187,12 +249,29 @@ class GenericDetectPlugin(object):
 
     @classmethod
     def validate(cls, obj, *args, **kwargs):
+        """Override this in subclass to validate the given args
+
+        @param cls subclass of GenericDetectPlugin and type of obj
+        @param obj instance of cls which is to be validated
+        @param args the same args as given to detect()
+        @param kwargs the same kwargs as given to detect()
+        """
         logging.debug("GDval")
         return True
 
     @classmethod
     def detect(cls, context, *args, **kwargs):
-        """Detect stuff"""
+        """Detect which plugin matches the given arguments
+
+        It might make sense to document the exact calling conventions in
+        derived classes:
+
+        >>> class FooDetectPlugin(GenericDetectPlugin):
+        ...     @classmethod
+        ...     def detect(cls, context, foo, bar):
+        ...         "detect plugin from foo and bar values yadda yadda"
+        ...         return super(FooDetectPlugin, cls).detect(cls, context, foo, bar)
+        """
         logging.debug("DETECT %s", cls)
         if len(cls.plugins) < 1:
             raise NoPluginsRegistered(cls)
