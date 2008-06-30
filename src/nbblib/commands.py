@@ -76,6 +76,7 @@ class Command(object):
     usage = ''
 
     def __init__(self, *args, **kwargs):
+        super(Command, self).__init__()
         self.validate_args(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
