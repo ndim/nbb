@@ -14,6 +14,6 @@ if True:
    logging.error("xxx error")
 
 
-import newplugins
-newplugins.selftest()
+import plugins
+plugins.selftest()
 

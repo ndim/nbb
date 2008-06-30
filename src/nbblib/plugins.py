@@ -67,6 +67,10 @@ import functools
 import inspect
 
 
+__all__ = []
+
+
+__all__.append('NoPluginsRegistered')
 class NoPluginsRegistered(Exception):
     """Raised when looking for plugins but none are registered"""
     def __init__(self, cls):
@@ -76,11 +80,13 @@ class NoPluginsRegistered(Exception):
         return "No plugins of type %s registered" % (self.cls.__name__)
 
 
+__all__.append('DuplicatePluginName')
 class DuplicatePluginName(Exception):
     """Raised when another plugin tries to register the same name"""
     pass
 
 
+__all__.append('PluginNoMatch')
 class PluginNoMatch(Exception):
     """Raised when no registered plugin matches the given args"""
     def __init__(self, *args, **kwargs):
@@ -92,6 +98,7 @@ class PluginNoMatch(Exception):
                               self.args, self.kwargs)
 
 
+__all__.append('AmbigousPluginDetection')
 class AmbigousPluginDetection(Exception):
     """Raised when more than one registered plugin matches the given args"""
     def __init__(self, matches, cls, context, *args, **kwargs):
@@ -110,6 +117,7 @@ class AmbigousPluginDetection(Exception):
                                               self.kwargs)
 
 
+__all__.append('AbstractMethodsInConcreteClass')
 class AbstractMethodsInConcreteClass(Exception):
     """Raised when an abstract method is detected in a non-abstract class
 
@@ -127,6 +135,7 @@ class AbstractMethodsInConcreteClass(Exception):
                methods)
 
 
+__all__.append('AbstractMethodError')
 class AbstractMethodError(Exception):
     """Raised when an abstract method is called"""
     def __init__(self, name, module):
@@ -138,6 +147,7 @@ class AbstractMethodError(Exception):
             % (repr(self.name), repr(self.module))
 
 
+__all__.append('abstractmethod')
 def abstractmethod(fun):
     """The decorator for abstract methods in plugins
 
@@ -160,6 +170,7 @@ def abstractmethod(fun):
     return f
 
 
+# Internal type __all__.append('PluginDict')
 class PluginDict(dict):
     """Helper for GenericPluginMeta class
 
@@ -175,6 +186,7 @@ class PluginDict(dict):
             super(PluginDict, self).__setitem__(key, value)
 
 
+__all__.append('GenericPluginMeta')
 class GenericPluginMeta(type):
     """Simple plugin metaclass with named plugins
 
@@ -220,6 +232,7 @@ class GenericPluginMeta(type):
             pass
 
 
+__all__.append('GenericDetectPlugin')
 class GenericDetectPlugin(object):
     """Advanced plugin class where the plugins detect whether they apply
 
@@ -297,6 +310,7 @@ class GenericDetectPlugin(object):
         return matches[matches.keys()[0]]
 
 
+# Not for __all__
 def selftest():
 
     class PluginNoMatchA(PluginNoMatch):

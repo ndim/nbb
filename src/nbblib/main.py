@@ -247,3 +247,6 @@ def cmdmain(argv):
         logging.shutdown()
         raise
 
+
+__all__ = ['cmdmain', 'main']
+

@@ -10,6 +10,9 @@ from nbblib import progutils
 from nbblib import plugins
 
 
+__all__ = []
+
+
 class NotABSSourceTree(plugins.PluginNoMatch):
     def __init__(self, vcs_tree):
         super(NotABSSourceTree, self).__init__()
@@ -29,6 +32,7 @@ class AmbigousBSDetection(plugins.AmbigousPluginDetection):
                                                          '\n  '.join(alist))
 
 
+__all__.append('BSSourceTree')
 class BSSourceTree(plugins.GenericDetectPlugin):
     __metaclass__ = plugins.GenericPluginMeta
     no_match_exception = NotABSSourceTree

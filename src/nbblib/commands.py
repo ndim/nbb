@@ -15,6 +15,9 @@ import nbblib.vcs as vcs
 import nbblib.bs as bs
 
 
+__all__ = []
+
+
 def adjust_doc(doc):
     """Remove common whitespace at beginning of doc string lines"""
     if not doc: return doc
@@ -31,6 +34,7 @@ def adjust_doc(doc):
     return almost_doc[:i]
 
 
+__all__.append('CommandLineError')
 class CommandLineError(Exception):
     def __init__(self, message, *args, **kwargs):
         super(CommandLineError, self).__init__()
@@ -48,6 +52,8 @@ class CommandLineError(Exception):
 # Command plugin system
 ########################################################################
 
+
+__all__.append('Command')
 class Command(object):
     """
     Mount point for plugins which refer to commands that can be performed.
@@ -332,6 +338,8 @@ class ConfigCommand(SourceClassCommand):
 # Commands
 ########################################################################
 
+
+__all__.append('UnknownCommand')
 class UnknownCommand(Exception):
     def __init__(self, cmd):
         super(UnknownCommand, self).__init__()
@@ -339,6 +347,8 @@ class UnknownCommand(Exception):
     def __str__(self):
         return "Fatal: Unknown command '%(cmd)s'" % self.__dict__
 
+
+__all__.append('NBB_Command')
 class NBB_Command(object):
     def __init__(self, cmd, cmdargs, context):
         if Command.plugins.has_key(cmd):

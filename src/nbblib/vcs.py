@@ -8,6 +8,9 @@ from nbblib import progutils
 from nbblib import plugins
 
 
+__all__ = []
+
+
 class AbstractConfig(object):
     """Return static config until we implement real config reading"""
 
@@ -54,6 +57,7 @@ class AmbigousVCSDetection(plugins.AmbigousPluginDetection):
         return "Ambigous VCS types detected for %s:\n%s" % (repr(self.srcdir), table)
 
 
+__all__.append('VCSourceTree')
 class VCSourceTree(plugins.GenericDetectPlugin):
     """
     Mount point for plugins which refer to actions that can be performed.
