@@ -34,12 +34,12 @@ if HAVE_PYDOC
 
 ALL_LOCAL += all-local-nbblib-pydoc
 all-local-nbblib-pydoc: all-local-nbblib
-	@mkdir -p pydoc && cd src && \
+	@mkdir -p pydoc && \
 	echo "Entering directory '$$PWD'"; \
-	for modfile in nbblib/*.py; do \
+	for modfile in src/nbblib/*.py; do \
 		mod="nbblib.$$(basename "$$modfile" .py)"; \
 		test "$$mod" = "nbblib.__init__" && mod="nbblib"; \
-		htmlfile="../pydoc/$${mod}.html"; \
+		htmlfile="pydoc/$${mod}.html"; \
 		ls -l --full-time "$$htmlfile" "$$modfile"; \
 		: "Darn. Better let MAKE calculate the deps, perhaps?" ; \
                 rebuild="no"; \
@@ -50,13 +50,13 @@ all-local-nbblib-pydoc: all-local-nbblib
 		else \
 			rebuild="yes"; \
 		fi; \
-		if test "$rebuild" = "yes"; then \
+		if test "$$rebuild" = "yes"; then \
 			echo $(PYDOC) -w "$${mod}"; \
-			$(PYDOC) -w "$${mod}"; \
-			if test -f "$$htmlfile" && cmp "$${mod}.html" "$$htmlfile"; \
-			then rm -f "$${mod}.html"; \
+			( cd src && $(PYDOC) -w "$${mod}" ); \
+			if test -f "$$htmlfile" && cmp "src/$${mod}.html" "$$htmlfile"; \
+			then rm -f "src/$${mod}.html"; \
 			else echo "INFO: Updating pydoc/$${mod}.html"; \
-			     mv -f "$${mod}.html" "$$htmlfile"; fi; \
+			     mv -f "src/$${mod}.html" "$$htmlfile"; fi; \
 		fi; \
 	done; \
 	echo "Leaving directory '$$PWD'"
