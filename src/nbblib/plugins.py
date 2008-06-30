@@ -1,5 +1,5 @@
 """\
-newplugins.py - generic plugin system
+plugins.py - generic plugin system
 
 Basic plugin architecture (metaclass tricks) by Marty Alchin from
 http://gulopine.gamemusic.org/2008/jan/10/simple-plugin-framework/
@@ -10,14 +10,14 @@ GenericPluginMeta slightly modified to
 Extended by GenericDetectPlugin to
  - support auto-detection of the adequate plugin
 
-Example usage of the newplugins module:
+Example usage of the plugins module:
 
-np = __import__(newplugins)
+p = __import__(plugins)
 
 Example non-auto-detection plugin:
 
 class NonDetectPluginType(object):
-    __metaclass__ = np.GenericPluginMeta
+    __metaclass__ = p.GenericPluginMeta
 
 class PluginA(NonDetectPluginType):
     name = "PA"
@@ -26,8 +26,8 @@ class PluginB(NonDetectPluginType):
 
 Example auto-detection plugin:
 
-class MyPluginType(np.GenericDetectPlugin):
-    __metaclass__ = np.GenericPluginMeta
+class MyPluginType(p.GenericDetectPlugin):
+    __metaclass__ = p.GenericPluginMeta
 
     # The calling convention for constructor
     # detect(context, <mystuff...>)
