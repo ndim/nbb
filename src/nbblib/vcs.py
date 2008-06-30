@@ -76,7 +76,7 @@ class VCSourceTree(plugins.GenericDetectPlugin):
     ambigous_match_exception = AmbigousVCSDetection
 
     @classmethod
-    def validate(cls, obj, srcdir):
+    def validate(cls, obj, context, srcdir):
         logging.debug("cls %s", cls)
         logging.debug("obj %s", obj)
         logging.debug("srcdir %s", srcdir)

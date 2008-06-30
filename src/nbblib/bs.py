@@ -39,7 +39,7 @@ class BSSourceTree(plugins.GenericDetectPlugin):
     ambigous_match_exception = AmbigousBSDetection
 
     @classmethod
-    def validate(cls, obj, vcs_tree):
+    def validate(cls, obj, context, vcs_tree):
         logging.debug("BSSourceTree.validate(%s, %s, %s) %s %s",
                       cls, obj, vcs_tree,
                       repr(obj.tree_root), repr(vcs_tree.tree_root))

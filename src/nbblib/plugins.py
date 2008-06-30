@@ -38,7 +38,7 @@ class MyPluginType(p.GenericDetectPlugin):
     [ambigous_match_exception = ...]
     [
     @classmethod
-    def validate(cls, obj, *args, **kwargs):
+    def validate(cls, obj, context, *args, **kwargs):
         return True # or False, depending on params
     ]
 
@@ -243,7 +243,7 @@ class GenericDetectPlugin(object):
     Example:
     >>> class FooDetectPlugin(GenericDetectPlugin):
     ...     @classmethod
-    ...     def validate(cls, obj, foo, bar):
+    ...     def validate(cls, obj, context, foo, bar):
     ...         return cls.__name__ == 'A'
     ... 
     >>> class FooDetectPluginA(FooDetectPlugin):
@@ -265,9 +265,10 @@ class GenericDetectPlugin(object):
         self.context = context
 
     @classmethod
-    def validate(cls, obj, *args, **kwargs):
+    def validate(cls, obj, context, *args, **kwargs):
         """Override this in subclass to validate the given args
 
+        @context Context information
         @param cls subclass of GenericDetectPlugin and type of obj
         @param obj instance of cls which is to be validated
         @param args the same args as given to detect()
@@ -298,7 +299,7 @@ class GenericDetectPlugin(object):
                 t = klass(context, *args, **kwargs)
                 logging.debug("KLASS %s unvalidated, %s", klass,
                               klass.validate)
-                if klass.validate(t, *args, **kwargs):
+                if klass.validate(t, context, *args, **kwargs):
                     logging.debug("KLASS %s validated", klass)
                     matches[key] = t
             except PluginNoMatch, e:
@@ -326,7 +327,7 @@ def selftest():
         no_match_exception = PluginNoMatchA
         ambigous_match_exception = AmbigousPluginDetectionA
         @classmethod
-        def validate(cls, obj, *args, **kwargs):
+        def validate(cls, obj, context, *args, **kwargs):
             logging.debug("Aval")
             return False
 
@@ -338,7 +339,7 @@ def selftest():
     class TestDetectPluginC(GenericDetectPlugin):
         __metaclass__ = GenericPluginMeta
         @classmethod
-        def validate(cls, obj, *args, **kwargs):
+        def validate(cls, obj, context, *args, **kwargs):
             logging.debug("Cval")
             return False
 
@@ -364,7 +365,7 @@ def selftest():
     class TestDetectPluginC3(TestDetectPluginC):
         name = "C3"
         @classmethod
-        def validate(cls, obj, *args, **kwargs):
+        def validate(cls, obj, context, *args, **kwargs):
             logging.debug("C3val")
             return True
 
