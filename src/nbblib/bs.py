@@ -45,6 +45,14 @@ class BSSourceTree(plugins.GenericDetectPlugin):
                       repr(obj.tree_root), repr(vcs_tree.tree_root))
         return obj.tree_root == vcs_tree.tree_root
 
+    @classmethod
+    def detect(cls, context, vcs_tree):
+        """Examine vcs_tree for build system has and return BSSourceTree obj
+
+        @param vcs_tree the vcs.VCSourceTree object to examine
+        """
+        super(BSSourceTree, cls).detect(context, vcs_tree)
+
 
     def get_tree_root(self): return self._get_tree_root()
     tree_root = property(get_tree_root)

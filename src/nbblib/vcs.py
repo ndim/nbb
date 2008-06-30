@@ -82,6 +82,14 @@ class VCSourceTree(plugins.GenericDetectPlugin):
         logging.debug("srcdir %s", srcdir)
         return obj.tree_root == srcdir
 
+    @classmethod
+    def detect(cls, context, srcdir):
+        """Examine srcdir for VCS system and return proper VCSourceTree obj
+
+        @param srcdir string with absolute path of source code directory
+        """
+        super(VCSourceTree, cls).detect(context, srcdir)
+
     def get_config(self):
         """Get configuration object which determines builddir etc"""
         return AbstractConfig(self.tree_root, self.branch_name)

@@ -56,7 +56,9 @@ class MyPluginB(MyPluginType):
             raise self.no_match_exception()
 
 Ideas:
- * Get rid of references to "context", and handle that in derived classes.
+ * Get rid of references to 'context', and handle that in derived classes.
+   Bad idea, as any serious plugin using program will have the plugins
+   operating in some kind of context.
 """
 
 
