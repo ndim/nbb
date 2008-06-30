@@ -243,3 +243,7 @@ def cmdmain(argv):
         logging.shutdown()
         print e
         sys.exit(2)
+    except SystemExit, e:
+        logging.shutdown()
+        raise
+
