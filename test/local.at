@@ -3,6 +3,39 @@ AT_TESTED([autom4te autoconf autoheader autoupdate autoreconf])
 # Local initialization of the test environment would happen here
 
 
+dnl Run proper python interpreter
+dnl AT_PYTHON_TO_PATH()dnl
+m4_define([AT_PYTHON_TO_PATH], [dnl
+AS_IF([test -x "$PYTHON"], [pybindir=`dirname "$PYTHON"`
+AS_IF([test -d "$pybindir"], [dnl
+ifs=$IFS
+found=false
+IFS=:
+for p in $PATH
+do
+	IFS=$ifs
+	if test "x$pybindir" = "x$p"
+	then
+		found=:
+		break
+	fi
+done
+IFS=$ifs
+if $found; then
+	PATH="$pybindir:$PATH"
+	export PATH
+fi
+])dnl
+])dnl
+])dnl
+
+
+dnl AT_NBB
+m4_define([AT_NBB], [dnl
+$(if test "${NBB_SCRIPT-nbb}" = "nbb"; then echo "nbb"; else echo $PYTHON $NBB_SCRIPT; fi)dnl
+])dnl
+
+
 dnl AT_WRAP_GIT([stuff-to-do-with-git-repo])dnl
 m4_define([AT_WRAP_GIT], [dnl
 AT_CHECK([mkdir test.dir && cd test.dir])

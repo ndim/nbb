@@ -9,7 +9,7 @@ dnl ===================================================================
 AT_SETUP([nbb scons: init])
 AT_KEYWORDS([nbb scons init])
 AT_WRAP_GIT_SCONS([dnl
-AT_CHECK([cd test.dir && nbb init])dnl
+AT_CHECK([cd test.dir && AT_NBB init])dnl
 ])dnl
 AT_CLEANUP()dnl
 
@@ -18,7 +18,7 @@ dnl ===================================================================
 AT_SETUP([nbb scons: configure])
 AT_KEYWORDS([nbb scons configure])
 AT_WRAP_GIT_SCONS([dnl
-AT_CHECK([cd test.dir && nbb configure])dnl
+AT_CHECK([cd test.dir && AT_NBB configure])dnl
 ])dnl
 AT_CLEANUP()dnl
 
@@ -35,7 +35,7 @@ gcc -o foobar foobar.o
 scons: done building targets.
 RUN: @<:@'scons'@:>@
   in $PWD/test.dir" > expout
-cd test.dir && nbb build], [0], [expout])dnl
+cd test.dir && AT_NBB build], [0], [expout])dnl
 ])dnl
 AT_CLEANUP()dnl
 
@@ -45,7 +45,7 @@ dnl AT_SETUP([nbb scons: install])
 dnl AT_KEYWORDS([nbb scons install])
 dnl AT_WRAP_GIT_SCONS([dnl
 dnl AT_CHECK([echo "FIXME $PWD/test.dir" > expout
-dnl cd test.dir && nbb install], [0], [expout])
+dnl cd test.dir && AT_NBB install], [0], [expout])
 dnl ])dnl
 dnl AT_CLEANUP()dnl
 

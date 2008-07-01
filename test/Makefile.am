@@ -36,14 +36,19 @@ check-local: git-version-check atconfig atlocal $(srcdir)/$(TESTSUITE)
 	@echo "INFO: Running uninstalled test suite"; \
 	abs_top_builddir="$$(cd "$(top_builddir)" > /dev/null 2>&1 && pwd)"; \
 	abs_top_srcdir="$$(cd "$(top_srcdir)" > /dev/null 2>&1 && pwd)"; \
+	echo "     " $(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH=`cd $(top_builddir)/src > /dev/null && pwd` PYTHONPATH="$${abs_top_builddir}/src" PYTHON="$(PYTHON)" NBB_SCRIPT="$${abs_top_builddir}/src/nbb" $(TESTSUITEFLAGS); \
 	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH=`cd $(top_builddir)/src > /dev/null && pwd` \
 		PYTHONPATH="$${abs_top_builddir}/src" \
+		PYTHON="$(PYTHON)" \
+		NBB_SCRIPT="$${abs_top_builddir}/src/nbb" \
 		$(TESTSUITEFLAGS)
 
 installcheck-local: atconfig atlocal $(srcdir)/$(TESTSUITE)
 	@echo "INFO: Running installed test suite"; \
 	$(SHELL) "$(srcdir)/$(TESTSUITE)" AUTOTEST_PATH='$(DESTDIR)$(bindir)' \
 		PYTHONPATH="$(DESTDIR)$(pythondir)" \
+		PYTHON="$(PYTHON)" \
+		NBB_SCRIPT="$(DESTDIR)$(bindir)/nbb" \
 		$(TESTSUITEFLAGS)
 
 clean-local:

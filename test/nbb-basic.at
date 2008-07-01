@@ -2,14 +2,13 @@ dnl ===================================================================
 
 AT_COPYRIGHT([Copyright (C) 2008 Hans Ulrich Niedermann])
 AT_TESTED([nbb])
-
-dnl ===================================================================
+AT_PYTHON_TO_PATH()dnl
 
 dnl ===================================================================
 
 AT_SETUP([nbb basic: --version option])
 AT_KEYWORDS([nbb version])
-AT_CHECK([nbb --version],
+AT_CHECK([AT_NBB --version],
 [0],
 [nbb (ndim's branch builder) AT_PACKAGE_VERSION
 ])
@@ -17,7 +16,7 @@ AT_CLEANUP()
 
 AT_SETUP([nbb basic: --version package name consistency])
 AT_KEYWORDS([nbb version])
-AT_CHECK([nbb --version | sed 's/^@<:@^(@:>@*(//; s/)@<:@^)@:>@*$//' | sed "s/'//"],
+AT_CHECK([AT_NBB --version | sed 's/^@<:@^(@:>@*(//; s/)@<:@^)@:>@*$//' | sed "s/'//"],
 [0],
 [AT_PACKAGE_NAME
 ])
@@ -27,14 +26,14 @@ dnl ===================================================================
 
 AT_SETUP([nbb basic: --help option])
 AT_KEYWORDS([nbb help])
-AT_CHECK([nbb --help], [0], [ignore], [ignore])
+AT_CHECK([AT_NBB --help], [0], [ignore], [ignore])
 AT_CLEANUP()
 
 dnl ===================================================================
 
 AT_SETUP([nbb basic: no parameters at all])
 AT_KEYWORDS([nbb no parameters])
-AT_CHECK([nbb], [2],
+AT_CHECK([AT_NBB], [2],
 [Command line error: nbb requires some arguments
 ], [])
 AT_CLEANUP()
@@ -43,7 +42,7 @@ dnl ===================================================================
 
 AT_SETUP([nbb help: without params])
 AT_KEYWORDS([nbb help])
-AT_CHECK([nbb help], [0], [ignore], [])
+AT_CHECK([AT_NBB help], [0], [ignore], [])
 AT_CLEANUP()
 
 dnl ===================================================================
@@ -55,7 +54,7 @@ sep='======================================================================='
 echo "$sep"
 for cmd in $(nbb help | sed -n 's/^\t\(@<:@^ \t@:>@\{1,\}\).*/\1/p')
 do
-    nbb help "$cmd" || { s=$?; echo "Error running 'nbb help $cmd"; exit $s; }
+    AT_NBB help "$cmd" || { s=$?; echo "Error running 'nbb help $cmd"; exit $s; }
     echo "$sep"
 done], [0], [ignore], [])
 AT_CLEANUP()
@@ -66,7 +65,7 @@ dnl ===================================================================
 
 AT_SETUP([nbb global option: --vcs=git])
 AT_KEYWORDS([nbb vcs global])
-AT_CHECK([nbb --vcs=git --version], [0], [dnl
+AT_CHECK([AT_NBB --vcs=git --version], [0], [dnl
 nbb (ndim's branch builder) AT_PACKAGE_VERSION
 ])
 AT_CLEANUP()
@@ -75,7 +74,7 @@ dnl ===================================================================
 
 AT_SETUP([nbb global option: --vcs git])
 AT_KEYWORDS([nbb vcs global])
-AT_CHECK([nbb --vcs git --version], [0], [dnl
+AT_CHECK([AT_NBB --vcs git --version], [0], [dnl
 nbb (ndim's branch builder) AT_PACKAGE_VERSION
 ])
 AT_CLEANUP()
@@ -84,7 +83,7 @@ dnl ===================================================================
 
 AT_SETUP([nbb global option: -v git])
 AT_KEYWORDS([nbb vcs global])
-AT_CHECK([nbb -v git --version], [0], [dnl
+AT_CHECK([AT_NBB -v git --version], [0], [dnl
 nbb (ndim's branch builder) AT_PACKAGE_VERSION
 ])
 AT_CLEANUP()
@@ -93,14 +92,14 @@ dnl ===================================================================
 
 AT_SETUP([nbb global option: multiple -v git --vcs git])
 AT_KEYWORDS([nbb vcs global])
-AT_CHECK([nbb -v git --vcs git --version], [1], [ignore], [ignore])
+AT_CHECK([AT_NBB -v git --vcs git --version], [1], [ignore], [ignore])
 AT_CLEANUP()
 
 dnl ===================================================================
 
 AT_SETUP([nbb internal-config: show internal config])
 AT_KEYWORDS([nbb internal-config])
-AT_CHECK([nbb internal-config], [0], [ignore], [])
+AT_CHECK([AT_NBB internal-config], [0], [ignore], [])
 AT_CLEANUP()
 
 dnl ===================================================================
