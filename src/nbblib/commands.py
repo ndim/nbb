@@ -210,7 +210,10 @@ class DetectVCSCommand(DetectCommand):
         self.vcs_sourcetree = vcs.VCSourceTree.detect(self.context, self.absdir)
         logging.debug("vcs_sourcetree %s", self.vcs_sourcetree)
     def run(self):
-        print 'VCS:', self.vcs_sourcetree.name, self.vcs_sourcetree.tree_root
+        if self.vcs_sourcetree:
+            print 'VCS:', self.vcs_sourcetree.name, self.vcs_sourcetree.tree_root
+        else:
+            print 'VCS:', 'Not detected'
 
 
 class DetectBSCommand(DetectCommand):
@@ -224,7 +227,10 @@ class DetectBSCommand(DetectCommand):
                                                     self.vcs_sourcetree)
         logging.debug("bs_sourcetree %s", self.bs_sourcetree)
     def run(self):
-        print 'BS:', self.bs_sourcetree.name, self.bs_sourcetree.tree_root
+        if self.bs_sourcetree:
+            print 'BS:', self.bs_sourcetree.name, self.bs_sourcetree.tree_root
+        else:
+            print 'BS:', 'Not detected'
 
 
 class BuildTestCommand(SourceClassCommand):
