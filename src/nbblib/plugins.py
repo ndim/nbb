@@ -221,13 +221,13 @@ class GenericPluginMeta(type):
             # This must be a plugin implementation, which should be registered.
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
-            logging.debug("Registering %s together with %s", cls, cls.plugins)
             def abstract_method_filter(member):
                 return hasattr(member, '__call__') \
                     and hasattr(member, 'abstract_method')
             ams = inspect.getmembers(cls, abstract_method_filter)
             if ams:
                 raise AbstractMethodsInConcreteClass(cls, ams)
+            logging.debug("Registering %s with %s as %s", cls, cls.plugins, cls.name)
             cls.plugins[cls.name] = cls
         else:
             # This must be an abstract subclass of plugins.
@@ -304,12 +304,14 @@ class GenericDetectPlugin(object):
                     matches[key] = t
             except PluginNoMatch, e:
                 pass
+        logging.debug("Matches: %s", matches)
         if len(matches) > 1:
             raise cls.ambigous_match_exception(matches,
                                                cls, context,
                                                *args, **kwargs)
         elif len(matches) < 1:
             raise cls.no_match_exception(*args, **kwargs)
+        logging.debug("Returning match from %s", matches)
         return matches[matches.keys()[0]]
 
 

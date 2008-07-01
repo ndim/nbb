@@ -77,6 +77,7 @@ class VCSourceTree(plugins.GenericDetectPlugin):
 
     @classmethod
     def validate(cls, obj, context, srcdir):
+        logging.debug("VCSourceTree.validate")
         logging.debug("cls %s", cls)
         logging.debug("obj %s", obj)
         logging.debug("srcdir %s", srcdir)
@@ -201,11 +202,15 @@ class BzrSourceTree(VCSourceTree):
     def __init__(self, context, srcdir):
         super(BzrSourceTree, self).__init__(context)
         try:
+            import bzrlib.errors
             import bzrlib.workingtree
-            wt,b = bzrlib.workingtree.WorkingTree.open_containing(srcdir)
-        except bzrlib.errors.NotBranchError:
-            raise self.no_match_exception(srcdir)
-        except ImportError:
+            try:
+                wt,b = bzrlib.workingtree.WorkingTree.open_containing(srcdir)
+            except bzrlib.errors.NotBranchError:
+                logging.debug("Not a bzr branch: %s", repr(srcdir))
+                raise self.no_match_exception(srcdir)
+        except ImportError, e:
+            logging.warning("Cannot load bzrlib.*", exc_info=e)
             raise self.no_match_exception(srcdir)
         self.wt = wt
         #print "wt:", wt
