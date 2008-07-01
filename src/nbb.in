@@ -11,71 +11,71 @@ import os
 
 PACKAGE_VERSION = "@PACKAGE_VERSION@"
 if sys.version_info < (2,4):
-   print "Fatal: This program requires Python 2.4 or later."
-   sys.exit(3)
+    print "Fatal: This program requires Python 2.4 or later."
+    sys.exit(3)
 
 import logging # since python 2.3
 
 
 def logmain(argv):
-   # funcName: Since python 2.5
-   # format="%(filename)s:%(lineno)d:%(funcName)s:"
-   logformat = "%(levelname)s: %(message)s"
-   loglevel = logging.WARNING
-   for i in range(len(argv)):
-      if argv[i] in ('--debug', ):
-         loglevel = logging.DEBUG
-      elif argv[i] in ('--info', ):
-         loglevel = logging.INFO
-   logging.basicConfig(format = logformat,
-                       level = loglevel,
-                       stream = sys.stderr)
-   if False:
-      logging.debug("xxx debug")
-      logging.info("xxx info")
-      logging.warning("xxx warn")
-      logging.error("xxx error")
+    # funcName: Since python 2.5
+    # format="%(filename)s:%(lineno)d:%(funcName)s:"
+    logformat = "%(levelname)s: %(message)s"
+    loglevel = logging.WARNING
+    for i in range(len(argv)):
+        if argv[i] in ('--debug', ):
+            loglevel = logging.DEBUG
+        elif argv[i] in ('--info', ):
+            loglevel = logging.INFO
+    logging.basicConfig(format = logformat,
+                        level = loglevel,
+                        stream = sys.stderr)
+    if False:
+        logging.debug("xxx debug")
+        logging.info("xxx info")
+        logging.warning("xxx warn")
+        logging.error("xxx error")
 
 
 def nbbmain(argv):
-   logmain(argv[1:])
-   pkgpythondir = "@pkgpythondir@"
-   lib_found = False
-   logging.debug("pkgpythondir %s", pkgpythondir)
-   logging.debug("sys.path %s", sys.path)
-   sys.stdout.flush()
-   orig_path = sys.path
-   for cond, path in [
-      (True, orig_path),
-      (os.path.exists(pkgpythondir), [pkgpythondir] + orig_path),
-      ]:
-      if cond:
-         sys.path = path
-         try:
-            import nbblib
-            logging.debug("nbb.PACKAGE_VERSION %s, nbblib.PACKAGE_VERSION %s",
-                          PACKAGE_VERSION, nbblib.PACKAGE_VERSION)
-            assert(nbblib.PACKAGE_VERSION == PACKAGE_VERSION)
-            lib_found = True
-            break
-         except AssertionError, e:
-            logging.debug("Assertion error", exc_info=True)
-            sys.path = orig_path
-         except ImportError, e:
-            logging.debug("Import error", exc_info=True)
-            sys.path = orig_path
-   if not lib_found:
-      logging.error("nbb: Fatal: Could not import nbblib.")
-      logging.shutdown()
-      sys.exit(3)
-   logging.info("Using nbblib loaded from %s, python prefix %s",
-                os.path.split(sys.modules['nbblib'].__file__)[0], sys.prefix)
-   import nbblib.main
-   nbblib.main.cmdmain(sys.argv)
+    logmain(argv[1:])
+    pkgpythondir = "@pkgpythondir@"
+    lib_found = False
+    logging.debug("pkgpythondir %s", pkgpythondir)
+    logging.debug("sys.path %s", sys.path)
+    sys.stdout.flush()
+    orig_path = sys.path
+    for cond, path in [
+        (True, orig_path),
+        (os.path.exists(pkgpythondir), [pkgpythondir] + orig_path),
+        ]:
+        if cond:
+            sys.path = path
+            try:
+                import nbblib
+                logging.debug("nbb.PACKAGE_VERSION %s, nbblib.PACKAGE_VERSION %s",
+                              PACKAGE_VERSION, nbblib.PACKAGE_VERSION)
+                assert(nbblib.PACKAGE_VERSION == PACKAGE_VERSION)
+                lib_found = True
+                break
+            except AssertionError, e:
+                logging.debug("Assertion error", exc_info=True)
+                sys.path = orig_path
+            except ImportError, e:
+                logging.debug("Import error", exc_info=True)
+                sys.path = orig_path
+    if not lib_found:
+        logging.error("nbb: Fatal: Could not import nbblib.")
+        logging.shutdown()
+        sys.exit(3)
+    logging.info("Using nbblib loaded from %s, python prefix %s",
+                 os.path.split(sys.modules['nbblib'].__file__)[0], sys.prefix)
+    import nbblib.main
+    nbblib.main.cmdmain(sys.argv)
 
 
 if __name__ == '__main__':
-   nbbmain(sys.argv)
+    nbbmain(sys.argv)
 
 
 # vim: syntax=python
