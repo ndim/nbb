@@ -20,6 +20,7 @@ AC_PROG_INSTALL
 
 ########################################################################
 
+AC_ARG_VAR([PYTHON], [python interpreter to use])
 AM_PATH_PYTHON([2.4], [:],
                [AC_MSG_ERROR([nbb does require Python >= 2.4])])
 AM_CONDITIONAL([HAVE_PYTHON], [ test "x$PYTHON" != "x:" ])
@@ -61,6 +62,18 @@ AC_PATH_PROG([SCONS], [scons], [no])
 
 AC_ARG_VAR([CMAKE], [cmake build toold])
 AC_PATH_PROG([CMAKE], [cmake], [no])
+
+########################################################################
+
+AC_SUBST([PACKAGE_VERSION_MAJOR], [$(echo $PACKAGE_VERSION | cut -d . -f 1)])
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_MAJOR], [$PACKAGE_VERSION_MAJOR],
+                [Major Version])
+AC_SUBST([PACKAGE_VERSION_MINOR], [$(echo $PACKAGE_VERSION | cut -d . -f 2)])
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_MINOR],
+                [Minor Version])
+AC_SUBST([PACKAGE_VERSION_PATCHLEVEL], [$(echo $PACKAGE_VERSION | cut -d . -f 3)])
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_PATCHLEVEL],
+                [Patchlevel Version])
 
 ########################################################################
 

@@ -1,4 +1,5 @@
-nbblibdir = $(pythondir)/nbblib
+pkgpythondir = ${pythondir}/${PACKAGE_TARNAME}-${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}
+nbblibdir = ${pkgpythondir}/nbblib
 
 ALL_LOCAL =
 

@@ -29,15 +29,15 @@ if False:
    logging.error("xxx error")
 
 if __name__ == '__main__':
-   pythondir = "@pythondir@"
+   pkgpythondir = "@pkgpythondir@"
    lib_found = False
-   #print "pythondir", pythondir
+   #print "pkgpythondir", pkgpythondir
    #print "sys.path", sys.path
    sys.stdout.flush()
    orig_path = sys.path
    for cond, path in [
       (True, orig_path),
-      (os.path.exists(pythondir), [pythondir] + orig_path),
+      (os.path.exists(pkgpythondir), [pkgpythondir] + orig_path),
       ]:
       if cond:
          sys.path = path
