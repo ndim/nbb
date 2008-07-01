@@ -173,13 +173,28 @@ class Context(object):
     vcs = VCSProperty()
     bs = BSProperty()
     dry_run = DryRunProperty()
-    verbose = BoolProperty()
     vcssystems = Property()
     buildsystems = Property()
+
+    def __init__(self):
+        super(Context, self).__init__()
+        for k in dir(self):
+            a = getattr(self, k)
+            if isinstance(a, Property):
+                logging.debug("setting property_name for %s", k)
+                a.property_name = k
 
     def __getitem__(self, key):
         """emulate a dict() for the purpose of "%(prog)s" % context"""
         return getattr(self, key)
+
+    def __str__(self):
+        kk = [x for x in dir(self) if (x.find('__') < 0) and (x.find('--') < 0)]
+        kk.sort()
+        lll = ( (k, getattr(self,k)) for k in kk )
+        return "%s(%s)" % (self.__class__.__name__,
+                           ", ".join(("%s=%s" % (a,repr(c))
+                                      for a,c in lll)))
 
 
 def main(argv):
@@ -218,10 +233,13 @@ def main(argv):
             context.vcs = argv[i]
         elif argv[i][:6] == '--vcs=':
             context.vcs = argv[i][6:]
-        elif argv[i] in ('--verbose', ):
-            context.verbose = True
+        elif argv[i] in ('--info', '--debug'):
+            pass # acted on in previous stage
+        else:
+            raise commands.CommandLineError('Unknown global option %s' % repr(argv[i]))
         # print "", i, argv[i]
         i = i + 1
+    logging.info("Context: %s", context)
     cmd = argv[i]
     cmdargs = argv[i+1:]
     nbb = commands.NBB_Command(cmd, cmdargs, context=context)
@@ -249,4 +267,5 @@ def cmdmain(argv):
 
 
 __all__ = ['cmdmain', 'main']
+
 

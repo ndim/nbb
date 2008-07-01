@@ -16,23 +16,33 @@ if sys.version_info < (2,4):
 
 import logging # since python 2.3
 
-# funcName: Since python 2.5
-# format="%(filename)s:%(lineno)d:%(funcName)s:"
-logging.basicConfig(format = "%(levelname)s: %(message)s",
-                    # level = logging.DEBUG,
-                    level = logging.WARNING,
-                    stream = sys.stderr)
-if False:
-   logging.debug("xxx debug")
-   logging.info("xxx info")
-   logging.warning("xxx warn")
-   logging.error("xxx error")
 
-if __name__ == '__main__':
+def logmain(argv):
+   # funcName: Since python 2.5
+   # format="%(filename)s:%(lineno)d:%(funcName)s:"
+   logformat = "%(levelname)s: %(message)s"
+   loglevel = logging.WARNING
+   for i in range(len(argv)):
+      if argv[i] in ('--debug', ):
+         loglevel = logging.DEBUG
+      elif argv[i] in ('--info', ):
+         loglevel = logging.INFO
+   logging.basicConfig(format = logformat,
+                       level = loglevel,
+                       stream = sys.stderr)
+   if False:
+      logging.debug("xxx debug")
+      logging.info("xxx info")
+      logging.warning("xxx warn")
+      logging.error("xxx error")
+
+
+def nbbmain(argv):
+   logmain(argv[1:])
    pkgpythondir = "@pkgpythondir@"
    lib_found = False
-   #print "pkgpythondir", pkgpythondir
-   #print "sys.path", sys.path
+   logging.debug("pkgpythondir %s", pkgpythondir)
+   logging.debug("sys.path %s", sys.path)
    sys.stdout.flush()
    orig_path = sys.path
    for cond, path in [
@@ -58,8 +68,15 @@ if __name__ == '__main__':
       logging.error("nbb: Fatal: Could not import nbblib.")
       logging.shutdown()
       sys.exit(3)
+   logging.info("Using nbblib loaded from %s, python prefix %s",
+                os.path.split(sys.modules['nbblib'].__file__)[0], sys.prefix)
    import nbblib.main
    nbblib.main.cmdmain(sys.argv)
+
+
+if __name__ == '__main__':
+   nbbmain(sys.argv)
+
 
 # vim: syntax=python
 # Local Variables:
