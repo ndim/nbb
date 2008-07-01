@@ -51,7 +51,7 @@ class BSSourceTree(plugins.GenericDetectPlugin):
 
         @param vcs_tree the vcs.VCSourceTree object to examine
         """
-        super(BSSourceTree, cls).detect(context, vcs_tree)
+        return super(BSSourceTree, cls).detect(context, vcs_tree)
 
 
     def get_tree_root(self): return self._get_tree_root()

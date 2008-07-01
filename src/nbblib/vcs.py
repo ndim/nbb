@@ -88,7 +88,7 @@ class VCSourceTree(plugins.GenericDetectPlugin):
 
         @param srcdir string with absolute path of source code directory
         """
-        super(VCSourceTree, cls).detect(context, srcdir)
+        return super(VCSourceTree, cls).detect(context, srcdir)
 
     def get_config(self):
         """Get configuration object which determines builddir etc"""
