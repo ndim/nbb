@@ -1,6 +1,4 @@
 TODO: (to get git-amb equivalent functionality)
- * Fine-tune init, configure, build, install commands with knowledge
-   gained with git-amb, especially the command interdependencies.
  * Implement *-sh and *-run commands.
  * Prepare public release:
    * Clean up git tags.
@@ -55,5 +53,8 @@ DONE:
    @classmethod -> Python 2.4
    new style classes -> Python 2.2
  * Add pydoc docs.
+ * Fine-tune init, configure, build, install commands with knowledge
+   gained with git-amb, especially the command interdependencies.
+   (Nothing to do! :)
 
 End of TODO file.
