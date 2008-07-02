@@ -6,6 +6,7 @@ TODO: (to get git-amb equivalent functionality)
    * Write docs: man page equivalent, README, and HACKING.
 
 TODO: (Large list)
+ * Move command objects to plugin detection framework
  * supports execution of user commands in source, build, install dirs
  * BS support: cmake, scons, ...
  * VCS support: SVN, darcs, hg, ...
