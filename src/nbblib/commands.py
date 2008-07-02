@@ -357,7 +357,7 @@ class UnknownCommand(Exception):
 __all__.append('NBB_Command')
 class NBB_Command(object):
     def __init__(self, cmd, cmdargs, context):
-        if Command.plugins.has_key(cmd):
+        if cmd in Command.plugins:
             try:
                 c = Command.plugins[cmd](*cmdargs, **{'context':context})
                 c.run()

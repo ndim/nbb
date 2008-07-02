@@ -101,7 +101,7 @@ class InvalidPropertyValue(Exception):
 class Property(object):
     def __init__(self, *args, **kwargs):
         assert(len(args) == 0)
-        if kwargs.has_key('default'):
+        if 'default' in kwargs:
             self.default = kwargs['default']
         valid_kwargs = ('default',)
         for kwa in kwargs.iterkeys():

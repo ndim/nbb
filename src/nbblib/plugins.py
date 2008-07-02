@@ -182,7 +182,7 @@ class PluginDict(dict):
 
     # This is the important difference between PluginDict and dict.
     def __setitem__(self, key, value):
-        if self.has_key(key):
+        if key in self:
             raise DuplicatePluginName()
         else:
             super(PluginDict, self).__setitem__(key, value)
