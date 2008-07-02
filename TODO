@@ -21,21 +21,19 @@ TODO: (Large list)
    for each command?
  * Add global --nick or similar option to determine the branch
    name to use for composing the pathes.
- * Find or implement @abstractmethod decorator.
- * Test cases for proper handling of detecting (0, 1, >1) x (VCS, BS).
- * Unify detect() methods.
  * Store config in ${srcdir}/.nbb.conf instead of 'git config'?
    More portable. bzr does not have a config interface, for example.
  * Model different "stages" of e.g. automake builds as distinct objects,
    including proper dependency detectors, and stuff? OK, we're not going
    to duplicate scons here.
- * BS autodetection might discover more than one BS instance of the same type?
  * Design nice user interface. Requirements:
    * start subshell in top_srcdir, builddir, installdir
  * Bash syntax completion for that user interface.
  * Man page or something similar. Generate from help texts?
 
 DONE:
+ * Find or implement @abstractmethod decorator.
+ * Unify detect() methods.
  * Design nice user interface. Requirements:
    * print top_srcdir, builddir, installdir. OK: 'config'
    * run 'autoreconf' type step. OK: 'init'
@@ -44,6 +42,8 @@ DONE:
    * run 'make install' type step. OK: 'install'
    * run custom (make) commands. OK: 'make'
  * VCS config support ('git config', bzr does not support anything like that)
+ * BS autodetection might discover more than one BS instance of the same type?
+ * Test cases for proper handling of detecting (0, 1, >1) x (VCS, BS).
  * Build system support: automake/autoconf
  * Merge stuff from Eclipse to src/own/nbb and vice versa.
  * Write test cases for init, configure, build, install.
