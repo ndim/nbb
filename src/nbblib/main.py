@@ -17,13 +17,30 @@ Features:
  * does out-of-source-tree builds (in-source-tree-builds unsupported)
  * direct support for automake/autoconf based build systems
 
-TBD: Command line interface:
+Command line interface (implemeted):
 
   Run default build commands:
     $ %(prog)s [general options] init [command specific options]
     $ %(prog)s [general options] configure [command specific options]
     $ %(prog)s [general options] build [command specific options]
     $ %(prog)s [general options] install [command specific options]
+
+  Get/set config:
+    $ %(prog)s [general options] config srcdir
+    $ %(prog)s [general options] config builddir [<builddir>]
+    $ %(prog)s [general options] config installdir [<installdir>]
+
+  Start an interactive shell in either of the three directories:
+    $ %(prog)s [general options] sh --srcdir [command specific options]
+    $ %(prog)s [general options] sh [--builddir] [command specific options]
+    $ %(prog)s [general options] sh --installdir [command specific options]
+
+  Run command in either of the three directories:
+    $ %(prog)s [general options] run --srcdir <command> [<param>...]
+    $ %(prog)s [general options] run [--builddir] <command> [<param>...]
+    $ %(prog)s [general options] run --installdir <command> [<param>...]
+
+TBD: Command line interface:
 
   Run cleanup commands:
     $ %(prog)s [general options] purge [command specific options]
@@ -33,26 +50,6 @@ TBD: Command line interface:
     $ %(prog)s [general options] purge-all    # either this
     $ %(prog)s [general options] purge --all  # or that
     TBD: 'make clean', 'make distclean' and similar stuff?
-
-  Get/set config:
-    $ %(prog)s [general options] config srcdir
-    $ %(prog)s [general options] config builddir [<builddir>]
-    $ %(prog)s [general options] config installdir [<installdir>]
-
-  Start an interactive shell in either of the three directories:
-    $ %(prog)s [general options] src-sh [command specific options]
-    $ %(prog)s [general options] build-sh [command specific options]
-    $ %(prog)s [general options] install-sh [command specific options]
-
-  Run command in builddir:
-    $ %(prog)s [general options] run <command> [<param>...]
-    $ %(prog)s [general options] run [command specific options... <-->] <cmd>...
-
-  (Not sure about these)
-  Run a non-interactive shell command in either of the three directories:
-    $ %(prog)s [general options] src-sh [command specific options] <command>...
-    $ %(prog)s [general options] build-sh [command specific options] <command>...
-    $ %(prog)s [general options] install-sh [command specific options] <cmd...>
 
 Global options:
 

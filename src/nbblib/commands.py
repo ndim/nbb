@@ -310,51 +310,41 @@ class MakeCommand(SourceClassCommand):
 class GeneralRunCommand(SourceClassCommand):
     """Run general command in some branch specific dir
 
-    Non-abstract derived classes MUST define run_in as one of
-    ['srcdir', 'builddir', 'installdir'].
     """
-    name = None
-    summary = 'run some command in some dir'
+    name = 'run'
+    summary = 'run some command in branch specific dir'
     validate_args = Command.validate_args_any
-    def get_run_in_dir(self):
-        return {
-            'srcdir':     self.bs_sourcetree.config.srcdir,
-            'builddir':   self.bs_sourcetree.config.builddir,
-            'installdir': self.bs_sourcetree.config.installdir,
-        }[self.run_in]
+    def __init__(self, context, *args, **kwargs):
+        super(GeneralRunCommand, self).__init__(context, *args, **kwargs)
+        self.rundir = None
+        self.run_in = 'builddir'
+        if len(self.args):
+            if self.args[0] == '--srcdir':
+                self.args = self.args[1:]
+                self.rundir = self.bs_sourcetree.config.srcdir
+                self.run_in = 'srcdir'
+            elif self.args[0] == '--installdir':
+                self.args = self.args[1:]
+                self.rundir = self.bs_sourcetree.config.installdir
+                self.run_in = 'installdir'
+            elif self.args[0] == '--builddir':
+                self.args = self.args[1:]
+        if not self.rundir:
+            self.rundir = self.bs_sourcetree.config.builddir
     def chdir(self):
-        rundir = self.get_run_in_dir()
-        if os.path.exists(rundir):
-            os.chdir(rundir)
+        if os.path.exists(self.rundir):
+            os.chdir(self.rundir)
         else:
             raise RuntimeError("The %s directory %s does not exist"
-                               % (self.run_in, repr(rundir)))
+                               % (self.run_in, repr(self.rundir)))
     def run(self):
         self.chdir()
         progutils.prog_run(list(self.args), self.context)
 
 
-class RunSrcCommand(GeneralRunCommand):
-    name    = 'run-src'
-    summary = 'run given command in source dir'
-    run_in  = 'srcdir'
-
-
-class RunBuildCommand(GeneralRunCommand):
-    name    = 'run-build'
-    summary = 'run given command in build dir'
-    run_in  = 'builddir'
-
-
-class RunInstallCommand(GeneralRunCommand):
-    name    = 'run-install'
-    summary = 'run given command in install dir'
-    run_in  = 'installdir'
-
-
 class GeneralShellCommand(GeneralRunCommand):
-    name    = None
-    summary = 'run shell in some dir'
+    name    = 'sh'
+    summary = 'run shell in branch specific dir'
     def get_shell_prompt(self):
         return r",--[Ctrl-d or 'exit' to quit this %s shell for branch '%s']--\n| <%s %s> %s\n\`--[\u@\h \W]\$ " \
             % (self.context.prog, self.vcs_sourcetree.branch_name,

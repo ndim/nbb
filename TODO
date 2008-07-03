@@ -31,12 +31,11 @@ TODO: (Large list)
  * Bash syntax completion for that user interface.
  * Man page or something similar. Generate from help texts?
  * Command aliases:
-     run  -> run-build
-     sh   -> sh-build
      make -> build    (for automake, or similar mapping)
+ * Test sh command like run command.
 
 DONE:
- * Implement *-sh and *-run commands.
+ * Implement sh and run commands.
  * supports execution of user commands in source, build, install dirs
  * Do not move command objects to plugin detection framework (bad idea!)
  * Find or implement @abstractmethod decorator.
