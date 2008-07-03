@@ -71,13 +71,10 @@ $1
 ])dnl
 
 
-dnl AT_CREATE_GIT_AM()dnl
-m4_define([AT_CREATE_GIT_AM], [dnl
-AT_CHECK([mkdir test.git && cd test.git])
-AT_CHECK([cd test.git && git init], [0],
-[Initialized empty Git repository in .git/
-])
-AT_DATA([test.git/configure.ac], [dnl
+dnl AT_WRAP_GIT_AM([stuff-to-do-with-tree])dnl
+m4_define([AT_WRAP_GIT_AM], [dnl
+AT_WRAP_GIT([
+AT_DATA([test.dir/configure.ac], [dnl
 AC[_]INIT(nbb git/automake test, 1.2.3, invalid@invalid.invalid, nbb-git-am-test)
 AC_CONFIG_SRCDIR([foobar.c])
 AM[_]INIT_AUTOMAKE([-Wall foreign])
@@ -86,20 +83,18 @@ AC_PROG_INSTALL
 AC[_]CONFIG_FILES(@<:@Makefile@:>@)
 AC[_]OUTPUT
 ])dnl
-AT_DATA([test.git/Makefile.am], [dnl
+AT_DATA([test.dir/Makefile.am], [dnl
 TESTS = foobar
 bin_PROGRAMS = foobar
 foobar_SOURCES = foobar.c
 ])dnl
-AT_DATA([test.git/foobar.c], [dnl
+AT_DATA([test.dir/foobar.c], [dnl
 #include <stdio.h>
 int main(int argc, char *argv@<:@@:>@) {
     printf("FOOBAR!\n");
     return 0;
 }
 ])dnl
+$1
 ])dnl
-
-m4_define([AT_REMOVE_GIT_AM], [dnl
-AT_CHECK([rm -rf test.git])
 ])dnl
