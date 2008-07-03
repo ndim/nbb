@@ -307,6 +307,71 @@ class MakeCommand(SourceClassCommand):
                            self.context)
 
 
+class GeneralRunCommand(SourceClassCommand):
+    name = None
+    summary = 'run some command in some dir'
+    validate_args = Command.validate_args_any
+    def get_run_in_dir(self):
+        return {
+            'srcdir':     self.bs_sourcetree.config.srcdir,
+            'builddir':   self.bs_sourcetree.config.builddir,
+            'installdir': self.bs_sourcetree.config.installdir,
+        }[self.run_in]
+    def run(self):
+        os.chdir(self.get_run_in_dir())
+        progutils.prog_run(list(self.args), self.context)
+
+
+class RunSrcCommand(GeneralRunCommand):
+    name    = 'run-src'
+    summary = 'run given command in source dir'
+    run_in  = 'srcdir'
+
+
+class RunBuildCommand(GeneralRunCommand):
+    name    = 'run-build'
+    summary = 'run given command in build dir'
+    run_in  = 'builddir'
+
+
+class RunInstallCommand(GeneralRunCommand):
+    name    = 'run-install'
+    summary = 'run given command in install dir'
+    run_in  = 'installdir'
+
+
+class GeneralShellCommand(GeneralRunCommand):
+    name    = None
+    summary = 'run shell in some dir'
+    def get_shell_prompt(self):
+        return r",--[Ctrl-d or 'exit' to quit this %s shell for branch '%s']--\n| <%s %s> %s\n\`--[\u@\h \W]\$ " \
+            % (self.context.prog, self.vcs_sourcetree.branch_name,
+               self.context.prog, self.name, self.get_run_in_dir(), )
+    def run(self):
+        os.chdir(self.get_run_in_dir())
+        # FIXME: Allow using $SHELL or similar.
+        progutils.prog_run(['sh'] + list(self.args), self.context,
+                           env_update = {'PS1': self.get_shell_prompt()})
+
+
+class SrcShellCommand(GeneralShellCommand):
+    name    = 'sh-src'
+    summary = 'run interactive shell in source dir'
+    run_in  = 'srcdir'
+
+
+class BuildShellCommand(GeneralShellCommand):
+    name    = 'sh-build'
+    summary = 'run interactive shell in build dir'
+    run_in  = 'builddir'
+
+
+class InstallShellCommand(GeneralShellCommand):
+    name    = 'sh-install'
+    summary = 'run interactive shell in install dir'
+    run_in  = 'installdir'
+
+
 class ConfigCommand(SourceClassCommand):
     name = 'config'
     summary = 'set/get config values'

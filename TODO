@@ -1,5 +1,4 @@
 TODO: (to get git-amb equivalent functionality)
- * Implement *-sh and *-run commands.
  * Prepare public release:
    * Clean up git tags.
    * Start new git repo (get rid of old ndim-git-utils stuff).
@@ -34,6 +33,7 @@ TODO: (Large list)
  * Man page or something similar. Generate from help texts?
 
 DONE:
+ * Implement *-sh and *-run commands.
  * Do not move command objects to plugin detection framework (bad idea!)
  * Find or implement @abstractmethod decorator.
  * Unify detect() methods.
