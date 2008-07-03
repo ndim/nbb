@@ -1,0 +1,78 @@
+dnl ===================================================================
+
+AT_COPYRIGHT([Copyright (C) 2008 Hans Ulrich Niedermann])
+AT_TESTED([nbb])
+
+dnl ===================================================================
+
+dnl Stuff to test:
+dnl  - (srcdir|builddir|installdir) (do|do not) exist
+dnl  - sh with simple shell script works
+dnl  - run with simple shell script works
+
+dnl ===================================================================
+
+AT_SETUP([nbb run-src])
+AT_KEYWORDS([nbb runsh run-src])
+AT_WRAP_GIT_AM([dnl
+AT_CHECK([dnl
+echo "$PWD/test.dir
+RUN: @<:@'pwd'@:>@
+  in $PWD/test.dir" > expout
+cd test.dir && AT_NBB run-src pwd], [0], [expout])
+])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb run-build: non-existing builddir])
+AT_KEYWORDS([nbb runsh run-build])
+AT_WRAP_GIT_AM([dnl
+AT_CHECK([dnl
+echo "ERROR: The builddir directory '$PWD/test.dir/_build/master' does not exist" > experr
+cd test.dir && AT_NBB run-build pwd], [1], [], [experr])
+])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb run-install: non-existing installdir])
+AT_KEYWORDS([nbb runsh run-install])
+AT_WRAP_GIT_AM([dnl
+AT_CHECK([dnl
+echo "ERROR: The installdir directory '$PWD/test.dir/_install/master' does not exist" > experr
+cd test.dir && AT_NBB run-install pwd], [1], [], [experr])
+])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb run-build: after build])
+AT_KEYWORDS([nbb runsh run-build])
+AT_WRAP_GIT_AM([dnl
+AT_CHECK([cd test.dir && AT_NBB build], [0], [ignore], [ignore])
+AT_CHECK([dnl
+echo "$PWD/test.dir/_build/master
+RUN: @<:@'pwd'@:>@
+  in $PWD/test.dir/_build/master" > expout
+cd test.dir && AT_NBB run-build pwd], [0], [expout])
+])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb run-install: after install])
+AT_KEYWORDS([nbb runsh run-install])
+AT_WRAP_GIT_AM([dnl
+AT_CHECK([cd test.dir && AT_NBB install], [0], [ignore], [ignore])
+AT_CHECK([dnl
+echo "$PWD/test.dir/_install/master
+RUN: @<:@'pwd'@:>@
+  in $PWD/test.dir/_install/master" > expout
+cd test.dir && AT_NBB run-install pwd], [0], [expout])
+])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+
