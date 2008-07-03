@@ -75,6 +75,7 @@ from nbblib import commands
 from nbblib import package
 from nbblib import plugins
 from nbblib import vcs
+from nbblib import progutils
 
 
 def print_version(context):
@@ -206,14 +207,13 @@ def main(argv):
 
     if len(argv) < 2:
         raise commands.CommandLineError(\
-            "%(prog)s requires some arguments",
-            prog=context.prog)
+            "%(prog)s requires some arguments" % context)
 
     i = 1
     while i<len(argv):
         if argv[i][0] != '-':
             break
-        if argv[i] in ('-h', '--help'):
+        elif argv[i] in ('-h', '--help'):
             print_help(context)
             return
         elif argv[i] in ('-V', '--version'):
@@ -225,7 +225,7 @@ def main(argv):
             i = i + 1
             assert(i<len(argv))
             context.bs = argv[i]
-        elif argv[i][:6] == '--build-system=':
+        elif argv[i][:15] == '--build-system=':
             context.bs = argv[i][6:]
         elif argv[i] in ('-v', '--vcs'):
             i = i + 1
@@ -236,32 +236,44 @@ def main(argv):
         elif argv[i] in ('--info', '--debug'):
             pass # acted on in previous stage
         else:
-            raise commands.CommandLineError('Unknown global option %s' % repr(argv[i]))
-        # print "", i, argv[i]
+            raise commands.CommandLineError(\
+                'Unknown global option %s' % repr(argv[i]))
         i = i + 1
+
     logging.info("Context: %s", context)
     cmd = argv[i]
     cmdargs = argv[i+1:]
-    nbb = commands.NBB_Command(cmd, cmdargs, context=context)
+
+    cdr = commands.Commander(context, cmd, *cmdargs)
+    cdr.run()
 
 
 def cmdmain(argv):
     try:
         main(argv)
         logging.shutdown()
-    except plugins.PluginNoMatch, e:
+    except commands.CommandLineError, e:
+        logging.error(e)
         logging.shutdown()
-        print e
+        sys.exit(2)
+    except commands.UnknownCommand, e:
+        logging.error(e)
+        logging.shutdown()
+        sys.exit(2)
+    except plugins.PluginNoMatch, e:
+        logging.error(e)
+        logging.shutdown()
         sys.exit(1)
     except plugins.AmbigousPluginDetection, e:
+        logging.error(e)
         logging.shutdown()
-        print e
         sys.exit(1)
-    except commands.CommandLineError, e:
+    except progutils.ProgramRunError, e:
+        logging.error(e)
         logging.shutdown()
-        print e
-        sys.exit(2)
+        sys.exit(3)
     except SystemExit, e:
+        logging.error("Someone called sys.exit() who should not have", exc_info=e)
         logging.shutdown()
         raise
 

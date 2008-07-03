@@ -6,7 +6,8 @@ TODO: (to get git-amb equivalent functionality)
    * Write docs: man page equivalent, README, and HACKING.
 
 TODO: (Large list)
- * Move command objects to plugin detection framework
+ * Switch plugins.Foo.validate() functions to different protocol:
+   Either return or raise an exception.
  * supports execution of user commands in source, build, install dirs
  * BS support: cmake, scons, ...
  * VCS support: SVN, darcs, hg, ...
@@ -33,6 +34,7 @@ TODO: (Large list)
  * Man page or something similar. Generate from help texts?
 
 DONE:
+ * Do not move command objects to plugin detection framework (bad idea!)
  * Find or implement @abstractmethod decorator.
  * Unify detect() methods.
  * Design nice user interface. Requirements:

@@ -76,7 +76,9 @@ class BSSourceTree(plugins.GenericDetectPlugin):
 
 
 class AutomakeSourceTree(BSSourceTree):
+
     name = 'automake'
+
     def __init__(self, context, vcs_tree):
         super(AutomakeSourceTree, self).__init__(context)
         srcdir = vcs_tree.tree_root
@@ -130,7 +132,9 @@ class AutomakeSourceTree(BSSourceTree):
 
 
 class SconsSourceTree(BSSourceTree):
+
     name = 'scons'
+
     def __init__(self, context, vcs_tree):
         super(SconsSourceTree, self).__init__(context)
         srcdir = vcs_tree.tree_root

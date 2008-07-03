@@ -33,9 +33,18 @@ dnl ===================================================================
 
 AT_SETUP([nbb basic: no parameters at all])
 AT_KEYWORDS([nbb no parameters])
-AT_CHECK([AT_NBB], [2],
-[Command line error: nbb requires some arguments
-], [])
+AT_CHECK([AT_NBB], [2], [], 
+[ERROR: Command line error: nbb requires some arguments
+])
+AT_CLEANUP()
+
+dnl ===================================================================
+
+AT_SETUP([nbb basic: unknown command])
+AT_KEYWORDS([nbb unknown command])
+AT_CHECK([AT_NBB this-command-does-not-exist], [2], [],
+[ERROR: Unknown nbb command 'this-command-does-not-exist'
+])
 AT_CLEANUP()
 
 dnl ===================================================================

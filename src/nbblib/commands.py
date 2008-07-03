@@ -15,7 +15,7 @@ import nbblib.vcs as vcs
 import nbblib.bs as bs
 
 
-__all__ = []
+__all__ = ['Commander']
 
 
 def adjust_doc(doc):
@@ -36,16 +36,21 @@ def adjust_doc(doc):
 
 __all__.append('CommandLineError')
 class CommandLineError(Exception):
-    def __init__(self, message, *args, **kwargs):
+    def __init__(self, message):
         super(CommandLineError, self).__init__()
-        if args:
-            self.msg = message % args
-        elif kwargs:
-            self.msg = message % kwargs
-        else:
-            self.msg = message
+        self.msg = message
     def __str__(self):
         return "Command line error: %s" % self.msg
+
+
+__all__.append('UnknownCommand')
+class UnknownCommand(Exception):
+    def __init__(self, context, cmd):
+        super(UnknownCommand, self).__init__()
+        self.prog = context.prog
+        self.cmd = cmd
+    def __str__(self):
+        return "Unknown %(prog)s command '%(cmd)s'" % self.__dict__
 
 
 ########################################################################
@@ -81,27 +86,44 @@ class Command(object):
 
     usage = ''
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, context, *args, **kwargs):
         super(Command, self).__init__()
         self.validate_args(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
-        self.context = kwargs['context']
+        self.context = context
 
     @plugins.abstractmethod
     def run(self):
         """Run the command"""
         pass
 
-    # Candidate for abstractmethod
-    def validate_args(self, *args, **kwargs):
-        """Validate command line arguments"""
-        print "Command: ", self.name
-        print "*args:   ", args
-        print "**kwargs:", kwargs
-        if len(args) > 0:
+    @plugins.abstractmethod
+    def validate_args(self, *cmdargs, **kwargs):
+        """Validate command line arguments: Abstract method.
+
+        May make use of self.context.
+        """
+        pass
+
+    def validate_args_none(self, *cmdargs, **kwargs):
+        """Validate command line arguments: no argument at all"""
+        logging.debug("Command:  %s", self.name)
+        logging.debug("*cmdargs: %s", cmdargs)
+        logging.debug("**kwargs: %s", kwargs)
+        if len(cmdargs) > 0:
             raise CommandLineError("'%s' command takes no parameters",
                                    self.name)
+        logging.debug("Command match!")
+        return True
+
+    def validate_args_any(self, *cmdargs, **kwargs):
+        """Validate command line arguments: accept any argument"""
+        logging.debug("Command:  %s", self.name)
+        logging.debug("*cmdargs: %s", cmdargs)
+        logging.debug("**kwargs: %s", kwargs)
+        logging.debug("Command match!")
+        return True
 
     def __str__(self):
         return "Command(%s, %s)" % (self.cmd_name, self.cmdargs)
@@ -127,8 +149,7 @@ class HelpCommand(Command):
         print "List of commands:"
         keys = Command.plugins.keys()
         if not keys:
-            print "Error: No commands found."
-            sys.exit(2)
+            raise Exception("No commands found. Please lart the developer.")
         keys.sort()
         keys2 = Command.plugins.keys()
 	keys2.sort(lambda a,b: cmp(len(b),len(a)))
@@ -163,6 +184,7 @@ class HelpCommand(Command):
 class InternalConfigCommand(Command):
     name = 'internal-config'
     summary = 'print internal program configuration'
+    validate_args = Command.validate_args_none
     def run(self):
         print "Source tree types:",  ", ".join(vcs.VCSourceTree.plugins.keys())
         print "Build system types:", ", ".join(bs.BSSourceTree.plugins.keys())
@@ -172,10 +194,9 @@ class InternalConfigCommand(Command):
 class SourceClassCommand(Command):
     """Base class for commands acting on source trees"""
     name = None # abstract command class
-    def __init__(self, *args, **kwargs):
-        super(SourceClassCommand, self).__init__(*args, **kwargs)
+    def __init__(self, context, *args, **kwargs):
+        super(SourceClassCommand, self).__init__(context, *args, **kwargs)
 
-        context = kwargs['context']
         srcdir = os.getcwd()
         absdir = os.path.abspath(srcdir)
 
@@ -193,20 +214,18 @@ class SourceClassCommand(Command):
 
 class DetectCommand(Command):
     name = None
-    def __init__(self, *args, **kwargs):
-        super(DetectCommand, self).__init__(*args, **kwargs)
-        self.context = kwargs['context']
+    def __init__(self, context, *args, **kwargs):
+        super(DetectCommand, self).__init__(context, *args, **kwargs)
         self.srcdir = os.getcwd()
         self.absdir = os.path.abspath(self.srcdir)
-    def validate_args(self, *args, **kwargs):
-        pass
+    validate_args = Command.validate_args_none
 
 
 class DetectVCSCommand(DetectCommand):
     name = "detect-vcs"
     summary = "detect source tree VCS"
-    def __init__(self, *args, **kwargs):
-        super(DetectVCSCommand, self).__init__(*args, **kwargs)
+    def __init__(self, context, *args, **kwargs):
+        super(DetectVCSCommand, self).__init__(context, *args, **kwargs)
         self.vcs_sourcetree = vcs.VCSourceTree.detect(self.context, self.absdir)
         logging.debug("vcs_sourcetree %s", self.vcs_sourcetree)
     def run(self):
@@ -214,13 +233,14 @@ class DetectVCSCommand(DetectCommand):
             print 'VCS:', self.vcs_sourcetree.name, self.vcs_sourcetree.tree_root
         else:
             print 'VCS:', 'Not detected'
+    validate_args = Command.validate_args_none
 
 
 class DetectBSCommand(DetectCommand):
     name = "detect-bs"
     summary = "detect source tree BS"
-    def __init__(self, *args, **kwargs):
-        super(DetectBSCommand, self).__init__(*args, **kwargs)
+    def __init__(self, context, *args, **kwargs):
+        super(DetectBSCommand, self).__init__(context, *args, **kwargs)
         self.vcs_sourcetree = vcs.VCSourceTree.detect(self.context, self.absdir)
         logging.debug("vcs_sourcetree %s", self.vcs_sourcetree)
         self.bs_sourcetree = bs.BSSourceTree.detect(self.context,
@@ -231,6 +251,7 @@ class DetectBSCommand(DetectCommand):
             print 'BS:', self.bs_sourcetree.name, self.bs_sourcetree.tree_root
         else:
             print 'BS:', 'Not detected'
+    validate_args = Command.validate_args_none
 
 
 class BuildTestCommand(SourceClassCommand):
@@ -241,49 +262,37 @@ class BuildTestCommand(SourceClassCommand):
         self.bs_sourcetree.configure()
         self.bs_sourcetree.build()
         self.bs_sourcetree.install()
+    validate_args = Command.validate_args_none
 
 
 class InitCommand(SourceClassCommand):
     name = 'init'
     summary = 'initialize buildsystem'
-    def validate_args(self, *args, **kwargs):
-        """Validate command line arguments"""
-        if len(args) > 0:
-            raise CommandLineError("'%s' command takes no parameters",
-                                   self.name)
+    validate_args = Command.validate_args_none
     def run(self):
         self.bs_sourcetree.init()
+
 
 class ConfigureCommand(SourceClassCommand):
     name = 'configure'
     summary = 'configure buildsystem'
-    def validate_args(self, *args, **kwargs):
-        """Validate command line arguments"""
-        if len(args) > 0:
-            raise CommandLineError("'%s' command takes no parameters",
-                                   self.name)
+    validate_args = Command.validate_args_none
     def run(self):
         self.bs_sourcetree.configure()
+
 
 class BuildCommand(SourceClassCommand):
     name = 'build'
     summary = 'build from source'
-    def validate_args(self, *args, **kwargs):
-        """Validate command line arguments"""
-        if len(args) > 0:
-            raise CommandLineError("'%s' command takes no parameters",
-                                   self.name)
+    validate_args = Command.validate_args_none
     def run(self):
         self.bs_sourcetree.build()
+
 
 class InstallCommand(SourceClassCommand):
     name = 'install'
     summary = 'install the built things'
-    def validate_args(self, *args, **kwargs):
-        """Validate command line arguments"""
-        if len(args) > 0:
-            raise CommandLineError("'%s' command takes no parameters",
-                                   self.name)
+    validate_args = Command.validate_args_none
     def run(self):
         self.bs_sourcetree.install()
 
@@ -291,8 +300,7 @@ class InstallCommand(SourceClassCommand):
 class MakeCommand(SourceClassCommand):
     name = 'make'
     summary = 'run make in builddir'
-    def validate_args(self, *args, **kwargs):
-        pass
+    validate_args = Command.validate_args_any
     def run(self):
         os.chdir(self.bs_sourcetree.config.builddir)
         progutils.prog_run(["make"] + list(self.args),
@@ -340,34 +348,17 @@ class ConfigCommand(SourceClassCommand):
             assert(False)
 
 
-########################################################################
-# Commands
-########################################################################
+class Commander(object):
 
-
-__all__.append('UnknownCommand')
-class UnknownCommand(Exception):
-    def __init__(self, cmd):
-        super(UnknownCommand, self).__init__()
-        self.cmd = cmd
-    def __str__(self):
-        return "Fatal: Unknown command '%(cmd)s'" % self.__dict__
-
-
-__all__.append('NBB_Command')
-class NBB_Command(object):
-    def __init__(self, cmd, cmdargs, context):
+    def __init__(self, context, cmd, *cmdargs):
+        self.context = context
+        logging.debug("Commander() %s %s", cmd, cmdargs)
         if cmd in Command.plugins:
-            try:
-                c = Command.plugins[cmd](*cmdargs, **{'context':context})
-                c.run()
-            except CommandLineError, e:
-                print "%(prog)s: Fatal:" % context, e
-                sys.exit(2)
-            except progutils.ProgramRunError, e:
-                print "%(prog)s: Fatal:" % context, e
-                sys.exit(3)
+            self.command = Command.plugins[cmd](context, *cmdargs)
         else:
-            print "%(prog)s:" % context, UnknownCommand(cmd)
-            sys.exit(2)
+            raise UnknownCommand(context, cmd)
 
+    def run(self):
+        self.command.run()
+
+# End of file.

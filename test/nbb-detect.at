@@ -8,8 +8,8 @@ dnl ===================================================================
 AT_SETUP([nbb detect-vcs: no VCS repository type])
 AT_KEYWORDS([nbb detect vcs])
 AT_CHECK([mkdir test.foo && cd test.foo])
-AT_CHECK([echo "Unknown VCS source tree type: '$PWD/test.foo'" > expout
-cd test.foo && AT_NBB detect-vcs], [1], [expout])
+AT_CHECK([echo "ERROR: Unknown VCS source tree type: '$PWD/test.foo'" > experr
+cd test.foo && AT_NBB detect-vcs], [1], [], [experr])
 AT_CHECK([rm -rf test.foo])
 AT_CLEANUP()
 
@@ -46,11 +46,11 @@ AT_CHECK([cd test.bzrgit && bzr init && bzr nick testnick])
 AT_CHECK([cd test.bzrgit && git init], [0],
 [Initialized empty Git repository in .git/
 ])
-AT_CHECK([echo "Ambigous VCS types detected for '$PWD/test.bzrgit':
+AT_CHECK([echo "ERROR: Ambigous VCS types detected for '$PWD/test.bzrgit':
   VCS type  Branch name
   git       master
-  bzr       testnick" > expout
-cd test.bzrgit && AT_NBB detect-vcs], [1], [expout])
+  bzr       testnick" > experr
+cd test.bzrgit && AT_NBB detect-vcs], [1], [], [experr])
 AT_CHECK([rm -rf test.bzrgit])
 AT_CLEANUP()
 
@@ -102,10 +102,10 @@ AC[_]OUTPUT
 AT_DATA([test.git/SConstruct], [dnl
 # Test
 ])
-AT_CHECK([echo "Ambigous BS types detected for '$PWD/test.git':
+AT_CHECK([echo "ERROR: Ambigous BS types detected for '$PWD/test.git':
   automake
-  scons" > expout
-cd test.git && AT_NBB detect-bs], [1], [expout])
+  scons" > experr
+cd test.git && AT_NBB detect-bs], [1], [], [experr])
 AT_CHECK([rm -rf test.git])
 AT_CLEANUP()
 
@@ -117,8 +117,8 @@ AT_CHECK([mkdir test.git && cd test.git])
 AT_CHECK([cd test.git && git init], [0],
 [Initialized empty Git repository in .git/
 ])
-AT_CHECK([echo "Unknown BS source tree type: '$PWD/test.git'" > expout
-cd test.git && AT_NBB detect-bs], [1], [expout])
+AT_CHECK([echo "ERROR: Unknown BS source tree type: '$PWD/test.git'" > experr
+cd test.git && AT_NBB detect-bs], [1], [], [experr])
 AT_CHECK([rm -rf test.git])
 AT_CLEANUP()
 
