@@ -7,7 +7,6 @@ TODO: (to get git-amb equivalent functionality)
 TODO: (Large list)
  * Switch plugins.Foo.validate() functions to different protocol:
    Either return or raise an exception.
- * supports execution of user commands in source, build, install dirs
  * BS support: cmake, scons, ...
  * VCS support: SVN, darcs, hg, ...
  * Make automake's make depend on configure etc.
@@ -31,9 +30,14 @@ TODO: (Large list)
    * start subshell in top_srcdir, builddir, installdir
  * Bash syntax completion for that user interface.
  * Man page or something similar. Generate from help texts?
+ * Command aliases:
+     run  -> run-build
+     sh   -> sh-build
+     make -> build    (for automake, or similar mapping)
 
 DONE:
  * Implement *-sh and *-run commands.
+ * supports execution of user commands in source, build, install dirs
  * Do not move command objects to plugin detection framework (bad idea!)
  * Find or implement @abstractmethod decorator.
  * Unify detect() methods.

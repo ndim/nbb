@@ -267,7 +267,7 @@ class BuildTestCommand(SourceClassCommand):
 
 class InitCommand(SourceClassCommand):
     name = 'init'
-    summary = 'initialize buildsystem'
+    summary = 'initialize buildsystem (e.g. "autoreconf")'
     validate_args = Command.validate_args_none
     def run(self):
         self.bs_sourcetree.init()
@@ -275,7 +275,7 @@ class InitCommand(SourceClassCommand):
 
 class ConfigureCommand(SourceClassCommand):
     name = 'configure'
-    summary = 'configure buildsystem'
+    summary = 'configure buildsystem (e.g. "./configure")'
     validate_args = Command.validate_args_none
     def run(self):
         self.bs_sourcetree.configure()
@@ -283,7 +283,7 @@ class ConfigureCommand(SourceClassCommand):
 
 class BuildCommand(SourceClassCommand):
     name = 'build'
-    summary = 'build from source'
+    summary = 'build from source (e.g. "make")'
     validate_args = Command.validate_args_none
     def run(self):
         self.bs_sourcetree.build()
@@ -291,7 +291,7 @@ class BuildCommand(SourceClassCommand):
 
 class InstallCommand(SourceClassCommand):
     name = 'install'
-    summary = 'install the built things'
+    summary = 'install the built things (e.g. "make install")'
     validate_args = Command.validate_args_none
     def run(self):
         self.bs_sourcetree.install()
@@ -308,6 +308,11 @@ class MakeCommand(SourceClassCommand):
 
 
 class GeneralRunCommand(SourceClassCommand):
+    """Run general command in some branch specific dir
+
+    Non-abstract derived classes MUST define run_in as one of
+    ['srcdir', 'builddir', 'installdir'].
+    """
     name = None
     summary = 'run some command in some dir'
     validate_args = Command.validate_args_any
