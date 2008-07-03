@@ -268,6 +268,10 @@ def cmdmain(argv):
         logging.error(e)
         logging.shutdown()
         sys.exit(1)
+    except RuntimeError, e:
+        logging.error(e)
+        logging.shutdown()
+        sys.exit(1)
     except progutils.ProgramRunError, e:
         logging.error(e)
         logging.shutdown()

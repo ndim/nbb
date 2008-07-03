@@ -317,8 +317,15 @@ class GeneralRunCommand(SourceClassCommand):
             'builddir':   self.bs_sourcetree.config.builddir,
             'installdir': self.bs_sourcetree.config.installdir,
         }[self.run_in]
+    def chdir(self):
+        rundir = self.get_run_in_dir()
+        if os.path.exists(rundir):
+            os.chdir(rundir)
+        else:
+            raise RuntimeError("The %s directory %s does not exist"
+                               % (self.run_in, repr(rundir)))
     def run(self):
-        os.chdir(self.get_run_in_dir())
+        self.chdir()
         progutils.prog_run(list(self.args), self.context)
 
 
@@ -348,7 +355,7 @@ class GeneralShellCommand(GeneralRunCommand):
             % (self.context.prog, self.vcs_sourcetree.branch_name,
                self.context.prog, self.name, self.get_run_in_dir(), )
     def run(self):
-        os.chdir(self.get_run_in_dir())
+        self.chdir()
         # FIXME: Allow using $SHELL or similar.
         progutils.prog_run(['sh'] + list(self.args), self.context,
                            env_update = {'PS1': self.get_shell_prompt()})
