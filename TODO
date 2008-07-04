@@ -1,20 +1,35 @@
-TODO: (to get git-amb equivalent functionality)
- * Prepare public release:
-   * Clean up git tags.
-   * Start new git repo (get rid of old ndim-git-utils stuff).
-   * Write docs: man page equivalent, README, and HACKING.
+========================================================================
+Release Plans:
+========================================================================
 
-TODO: (Large list)
+nbb-0.1
+ * Start new git repo (get rid of ndim-git-utils history).
+ * Clean up git tags.
+
+nbb-0.5
+ * Write docs: man page equivalent, README, NEWS, HACKING.
+
+nbb-1.0
+ * Make public release.
+
+========================================================================
+TODO (some time):
+========================================================================
+
+ * Separate generic plugin/command/etc. stuff and nbb specific
+   code into separate modules.
  * Switch plugins.Foo.validate() functions to different protocol:
    Either return or raise an exception.
+ * Use different exceptions for plugins signalling detection failure
+   to detect() and detect() to signal "no matching plugin detected"
+   to detect()'s caller.
  * BS support: cmake, scons, ...
  * VCS support: SVN, darcs, hg, ...
- * Make automake's make depend on configure etc.
  * Out-of-source builds for systems which require in-source-tree builds:
    "cp -rl foo.src foo.build"?
  * General removal of redundancy in Python code.
  * Useful logging infrastructure, and --debug etc user interface.
- * Make sure the if cmp ... mv .. rm in make rules are correct and useful.
+ * Make sure the "if cmp ... mv .. rm" in make rules are correct and useful.
  * More declarative syntax elements in the Python code.
  * Use declarations for command line parsing, and help text generation.
    Use optparse stuff for both global params and extra optparse stuff
@@ -26,15 +41,17 @@ TODO: (Large list)
  * Model different "stages" of e.g. automake builds as distinct objects,
    including proper dependency detectors, and stuff? OK, we're not going
    to duplicate scons here.
- * Design nice user interface. Requirements:
-   * start subshell in top_srcdir, builddir, installdir
- * Bash syntax completion for that user interface.
+ * Bash syntax completion
  * Man page or something similar. Generate from help texts?
  * Command aliases:
      make -> build    (for automake, or similar mapping)
+ * Make automake's make depend on configure etc.
  * Test sh command like run command.
 
+========================================================================
 DONE:
+========================================================================
+
  * Implement sh and run commands.
  * supports execution of user commands in source, build, install dirs
  * Do not move command objects to plugin detection framework (bad idea!)
@@ -63,4 +80,6 @@ DONE:
    gained with git-amb, especially the command interdependencies.
    (Nothing to do! :)
 
+========================================================================
 End of TODO file.
+========================================================================
