@@ -7,6 +7,9 @@ import os
 import subprocess
 
 
+__all__ = ['prog_stdout', 'prog_retstd', 'ProgramRunError', 'prog_run']
+
+
 def prog_stdout(call_list):
     """Run program and return stdout (similar to shell backticks)"""
     p = subprocess.Popen(call_list,
@@ -41,13 +44,17 @@ class ProgramRunError(Exception):
                    repr(self.cwd)))
 
 
-def prog_run(call_list, context):
+def prog_run(call_list, context=None, env=None, env_update=None):
     """Run program showing its output. Raise exception if retcode != 0."""
     print "RUN:", call_list
     print "  in", os.getcwd()
-    if context.dry_run:
+    if context and context.dry_run:
         return None
-    p = subprocess.Popen(call_list)
+    if not env:
+        env = os.environ.copy()
+    if env_update:
+        env.update(env_update)
+    p = subprocess.Popen(call_list, env=env)
     stdout, stderr = p.communicate(input=None)
     if p.returncode != 0:
         raise ProgramRunError(call_list, p.returncode, os.getcwd())

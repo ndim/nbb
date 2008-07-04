@@ -1,5 +1,6 @@
 import nbblib.bs as bs
 import nbblib.commands as commands
+import nbblib.nbbcommands as nbbcommands
 import nbblib.plugins as plugins
 import nbblib.package as package
 import nbblib.progutils as progutils
