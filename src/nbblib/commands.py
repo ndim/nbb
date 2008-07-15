@@ -90,8 +90,8 @@ class Command(object):
         logging.debug("*cmdargs: %s", cmdargs)
         logging.debug("**kwargs: %s", kwargs)
         if len(cmdargs) > 0:
-            raise CommandLineError("'%s' command takes no parameters",
-                                   self.name)
+            raise CommandLineError("'%s' command takes no parameters"
+                                   % self.name)
         logging.debug("Command match!")
         return True
 

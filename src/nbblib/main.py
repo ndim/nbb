@@ -122,12 +122,10 @@ class Property(object):
         else:
             setattr(instance, self.name, self.convert(value))
     def __str__(self):
-        if hasattr(instance, self.name):
-            return getattr(instance, self.name)
-        elif hasattr(self, 'default'):
-            return '<property defaulting to %s>' % self.default
+        if hasattr(self, 'default'):
+            return '<property %s defaulting to %s>' % (self.__class__.__name, self.default)
         else:
-            return '<undefined property>'
+            return '<property %s>' % (self.__class__.__name__)
     def isvalid(self, value):
         return True
     def convert(self, value):

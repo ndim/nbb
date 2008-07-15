@@ -43,9 +43,9 @@ class HelpCommand(Command):
 
     def validate_args(self, *args, **kwargs):
         if len(args) == 1 and args[0] not in Command.plugins.keys():
-            raise CommandLineError("'%s' is an invalid command name", args[0])
+            raise CommandLineError("'%s' is an invalid command name" % args[0])
         elif len(args) > 1:
-            raise CommandLineError("'%s' command only takes one optional parameter", self.name)
+            raise CommandLineError("'%s' command only takes one optional parameter" % self.name)
 
     def _print_command_list(self):
         print "List of commands:"
@@ -284,19 +284,19 @@ class ConfigCommand(SourceClassCommand):
     def validate_args(self, *args, **kwargs):
         items = ('srcdir', 'builddir', 'installdir', )
         if len(args) == 0:
-            raise CommandLineError("'%s' command requires at least one parameter (%s)",
-                                   self.name, ', '.join(items))
+            raise CommandLineError("'%s' command requires at least one parameter (%s)"
+                                   % (self.name, ', '.join(items)))
         elif len(args) == 1 and args[0] in items:
             pass
         elif len(args) == 2 and args[0] in items:
             if args[0] in ('srcdir', ):
-                raise CommandLineError("'%s' command cannot change 'srcdir'",
-                                       self.name)
+                raise CommandLineError("'%s' command cannot change 'srcdir'"
+                                       % self.name)
             else:
                 pass
         else:
-            raise CommandLineError("'%s' requires less or different parameters",
-                                   self.name)
+            raise CommandLineError("'%s' requires less or different parameters"
+                                   % self.name)
 
     def run(self):
         git_get_items = ('builddir', 'installdir', 'srcdir')
