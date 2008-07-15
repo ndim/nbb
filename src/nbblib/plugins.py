@@ -62,9 +62,7 @@ Ideas:
 """
 
 
-import sys
 import logging
-import types
 import functools
 import inspect
 
@@ -311,7 +309,7 @@ class GenericDetectPlugin(object):
                 if klass.validate(t, context, *args, **kwargs):
                     logging.debug("KLASS %s validated", klass)
                     matches[key] = t
-            except PluginNoMatch, e:
+            except PluginNoMatch:
                 pass
         logging.debug("Matches: %s", matches)
         if len(matches) > 1:
