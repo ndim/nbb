@@ -85,7 +85,12 @@ class NoPluginsRegistered(Exception):
 __all__.append('DuplicatePluginName')
 class DuplicatePluginName(Exception):
     """Raised when another plugin tries to register the same name"""
-    pass
+    def __init__(self, name, old, new):
+        super(DuplicatePluginName, self).__init__()
+        self.msg = "Duplicate plugin name %s, old plugin %s, new plugin %s" \
+            % (repr(name), str(old), str(new))
+    def __str__(self):
+        return self.msg
 
 
 __all__.append('PluginNoMatch')
@@ -182,8 +187,12 @@ class PluginDict(dict):
 
     # This is the important difference between PluginDict and dict.
     def __setitem__(self, key, value):
-        if key in self:
-            raise DuplicatePluginName()
+        if (key in self):
+            old = self[key]
+            if old.__name__ == value.__name__ and old.__module__ == value.__module__:
+                pass
+            else:
+                raise DuplicatePluginName(name=key, old=self[key], new=value)
         else:
             super(PluginDict, self).__setitem__(key, value)
 
