@@ -104,11 +104,12 @@ class Command(object):
         return True
 
     def __str__(self):
-        return "Command(%s, %s)" % (self.cmd_name, self.cmdargs)
+        return "Command(%s, %s)" % (self.name, self.cmdargs)
 
 
 __all__.append('Commander')
 class Commander(object):
+    """Represent cmdline command (parse args, find and run the command)"""
 
     def __init__(self, context, cmd, *cmdargs):
         self.context = context

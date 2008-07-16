@@ -55,11 +55,14 @@ class MyPluginB(MyPluginType):
         if not other_detection_successful:
             raise self.no_match_exception()
 
-Ideas:
- * Get rid of references to 'context', and handle that in derived classes.
-   Bad idea, as any serious plugin using program will have the plugins
-   operating in some kind of context.
 """
+
+
+# TODO: Check plugin instances for defined members.
+#  1. class AbstractMember(...): __get__, __set__
+#  2. class ConcreteMember(...): __get__, __set__
+#  3. plugin registration checks presence of AbstractMember instances,
+#     and fails if one is found
 
 
 import logging
@@ -107,6 +110,7 @@ __all__.append('AmbigousPluginDetection')
 class AmbigousPluginDetection(Exception):
     """Raised when more than one registered plugin matches the given args"""
     def __init__(self, matches, cls, context, *args, **kwargs):
+        super(AmbigousPluginDetection, self).__init__()
         self.matches = matches
         self.cls = cls
         self.context = context
@@ -130,10 +134,11 @@ class AbstractMethodsInConcreteClass(Exception):
     implemented if this class is not abstract itself.
     """
     def __init__(self, cls, methods):
+        super(AbstractMethodsInConcreteClass, self).__init__()
         self.cls = cls
         self.methods = methods
     def __str__(self):
-        methods = " ".join((k for k,v in self.methods))
+        methods = " ".join((key for key, value in self.methods))
         return "Class %s.%s must implement the %s abstract methods." \
             % (self.cls.__module__,
                self.cls.__name__,
@@ -144,10 +149,11 @@ __all__.append('AbstractMethodError')
 class AbstractMethodError(Exception):
     """Raised when an abstract method is called"""
     def __init__(self, name, module):
+        super(AbstractMethodError, self).__init__()
         self.name = name
         self.module = module
     def __str__(self):
-        # FIXME: Class name?
+        # FIXME: How to print class name alongside module and method name?
         return "Abstract method %s called someplace in %s" \
             % (repr(self.name), repr(self.module))
 
@@ -167,12 +173,12 @@ def abstractmethod(fun):
        before the actual program is run!
     """
     @functools.wraps(fun)
-    def f(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs):
         # fun(self, *args, **kwargs)
         raise AbstractMethodError(name=fun.__name__,
                                   module=fun.__module__)
-    f.abstract_method = True
-    return f
+    wrapper.abstract_method = True
+    return wrapper
 
 
 # Internal type __all__.append('PluginDict')
@@ -216,26 +222,27 @@ class GenericPluginMeta(type):
     You can add abstract subclasses of Plugin by giving them a __name__ = None,
     define an @abstractmethod method in that abstract subclass, and much more.
     """
-    def __init__(cls, name, bases, attrs):
-        logging.debug("META_INIT %s %s %s %s", cls, name, bases, attrs)
-        if not hasattr(cls, 'plugins'):
+    def __init__(mcs, name, bases, attrs):
+        super(GenericPluginMeta, mcs).__init__()
+        logging.debug("META_INIT %s %s %s %s", mcs, name, bases, attrs)
+        if not hasattr(mcs, 'plugins'):
             # This branch only executes when processing the mount point itself.
             # So, since this is a new plugin type, not an implementation, this
             # class shouldn't be registered as a plugin. Instead, it sets up a
             # list where plugins can be registered later.
-            cls.plugins = PluginDict()
-        elif cls.name is not None:
+            mcs.plugins = PluginDict()
+        elif mcs.name is not None:
             # This must be a plugin implementation, which should be registered.
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
             def abstract_method_filter(member):
                 return hasattr(member, '__call__') \
                     and hasattr(member, 'abstract_method')
-            ams = inspect.getmembers(cls, abstract_method_filter)
+            ams = inspect.getmembers(mcs, abstract_method_filter)
             if ams:
-                raise AbstractMethodsInConcreteClass(cls, ams)
-            logging.debug("Registering %s with %s as %s", cls, cls.plugins, cls.name)
-            cls.plugins[cls.name] = cls
+                raise AbstractMethodsInConcreteClass(mcs, ams)
+            logging.debug("Registering %s with %s as %s", mcs, mcs.plugins, mcs.name)
+            mcs.plugins[mcs.name] = mcs
         else:
             # This must be an abstract subclass of plugins.
             pass
@@ -310,7 +317,7 @@ class GenericDetectPlugin(object):
                     logging.debug("KLASS %s validated", klass)
                     matches[key] = t
             except PluginNoMatch:
-                pass
+                pass # ignore non-matching plugins
         logging.debug("Matches: %s", matches)
         if len(matches) > 1:
             raise cls.ambigous_match_exception(matches,

@@ -1,3 +1,8 @@
+"""\
+VCS Source Tree plugin system
+"""
+
+
 import os
 import logging
 import urlparse
@@ -31,10 +36,6 @@ class AbstractConfig(object):
         return os.path.join(self._srcdir, "_install", self._nick)
     installdir = property(get_installdir)
 
-
-########################################################################
-# VCS Source Tree plugin system
-########################################################################
 
 class NotAVCSourceTree(plugins.PluginNoMatch):
     def __init__(self, srcdir):
@@ -151,7 +152,7 @@ class GitSourceTree(VCSourceTree):
 
     def _get_branch_name(self):
         bname = progutils.prog_stdout(["git", "symbolic-ref", "HEAD"])
-        refs,heads,branch = bname.split('/')
+        refs, heads, branch = bname.split('/')
         assert(refs=='refs' and heads=='heads')
         return branch
 
@@ -162,14 +163,16 @@ class GitConfig(AbstractConfig):
     def __init__(self, *args, **kwargs):
         super(GitConfig, self).__init__(*args, **kwargs)
 
-    def _itemname(self, item): return '.'.join((package.GIT_CONFIG_PREFIX, item, ))
+    def _itemname(self, item):
+        return '.'.join((package.GIT_CONFIG_PREFIX, item, ))
+
     def _myreldir(self, rdir):
         return os.path.join(self._srcdir, rdir, self._nick)
 
     def get_builddir(self):
         ret, stdout, stderr = progutils.prog_retstd(['git', 'config', self._itemname('builddir')])
         assert(stderr == "")
-	if ret == 0 and stdout:
+        if ret == 0 and stdout:
             return self._myreldir(stdout)
         else:
             return super(GitConfig, self).get_builddir()
@@ -183,7 +186,7 @@ class GitConfig(AbstractConfig):
     def get_installdir(self):
         ret, stdout, stderr = progutils.prog_retstd(['git', 'config', self._itemname('installdir')])
         assert(stderr == "")
-	if ret == 0 and stdout:
+        if ret == 0 and stdout:
             return self._myreldir(stdout)
         else:
             return super(GitConfig, self).get_installdir()
@@ -205,7 +208,7 @@ class BzrSourceTree(VCSourceTree):
             import bzrlib.errors
             import bzrlib.workingtree
             try:
-                wt,b = bzrlib.workingtree.WorkingTree.open_containing(srcdir)
+                wt, b = bzrlib.workingtree.WorkingTree.open_containing(srcdir)
             except bzrlib.errors.NotBranchError:
                 logging.debug("Not a bzr branch: %s", repr(srcdir))
                 raise self.no_match_exception(srcdir)
@@ -223,7 +226,7 @@ class BzrSourceTree(VCSourceTree):
         #print "wt.branch.basis_tree:", wt.branch.basis_tree()
 
     def _get_tree_root(self):
-        proto,host,path,some,thing = urlparse.urlsplit(self.wt.branch.base)
+        proto, host, path, some, thing = urlparse.urlsplit(self.wt.branch.base)
         assert(proto == "file" and host == "")
         assert(some == "" and thing == "")
         return os.path.abspath(path)

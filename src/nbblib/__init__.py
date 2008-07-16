@@ -1,3 +1,9 @@
+"""Convenience package for nbb
+
+How exactly to cleanly import the modules in the future is still unclear,
+so we'll just keep it as is for now.
+"""
+
 import nbblib.bs as bs
 import nbblib.commands as commands
 import nbblib.nbbcommands as nbbcommands

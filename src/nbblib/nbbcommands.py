@@ -3,25 +3,27 @@ nbblib.nbbcommands - implementation of nbb commands
 Copyright (C) 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
 """
 
-import sys
 import os
 import logging
 
 
-import nbblib.package as package
 import nbblib.progutils as progutils
 import nbblib.vcs as vcs
 import nbblib.bs as bs
-from nbblib.commands import *
+
+
+from nbblib.commands import Command, CommandLineError
 
 
 def adjust_doc(doc):
     """Remove common whitespace at beginning of doc string lines"""
-    if not doc: return doc
+    if not doc:
+        return doc
     i = 0
-    for i in range(len(doc)):
+    while i < len(doc):
         if doc[i] not in " \t":
             break
+        i += 1
     prefix = doc[:i]
     rest_doc = doc[i:]
     almost_doc = rest_doc.replace("\n%s" % prefix, "\n")
@@ -42,24 +44,26 @@ class HelpCommand(Command):
     usage = '[<command>]'
 
     def validate_args(self, *args, **kwargs):
+        """Accept zero args or one arg, a command name"""
         if len(args) == 1 and args[0] not in Command.plugins.keys():
             raise CommandLineError("'%s' is an invalid command name" % args[0])
         elif len(args) > 1:
             raise CommandLineError("'%s' command only takes one optional parameter" % self.name)
 
     def _print_command_list(self):
+        """Print list of commands (no help arg given)"""
         print "List of commands:"
         keys = Command.plugins.keys()
         if not keys:
             raise Exception("No commands found. Please lart the developer.")
         keys.sort()
         keys2 = Command.plugins.keys()
-	keys2.sort(lambda a,b: cmp(len(b),len(a)))
-	print "keys ", keys
-	print "keys2", keys2
+        keys2.sort(lambda a, b: cmp(len(b), len(a)))
+        print "keys ", keys
+        print "keys2", keys2
         fmt = "\t%%-%ds\t%%s" % len(keys2[0])
         for k in keys:
-           print fmt % (k, Command.plugins[k].summary)
+            print fmt % (k, Command.plugins[k].summary)
 
     def _print_command_help(self, cmd):
         """print help for command cmd"""
@@ -75,6 +79,7 @@ class HelpCommand(Command):
                 print adjust_doc(c.__doc__)
 
     def run(self):
+        """Branch to the real commands"""
         if len(self.args) == 0:
             self._print_command_list()
         elif len(self.args) == 1:
@@ -88,6 +93,7 @@ class InternalConfigCommand(Command):
     summary = 'print internal program configuration'
     validate_args = Command.validate_args_none
     def run(self):
+        """Just print info, do nothing else"""
         print "Source tree types:",  ", ".join(vcs.VCSourceTree.plugins.keys())
         print "Build system types:", ", ".join(bs.BSSourceTree.plugins.keys())
         print "Commands:",           ", ".join(Command.plugins.keys())
@@ -110,8 +116,8 @@ class SourceClassCommand(Command):
         logging.debug("bs_sourcetree %s", self.bs_sourcetree)
 
         cfg = self.vcs_sourcetree.config
-        for x in ('srcdir', 'builddir', 'installdir'):
-            logging.info("CONFIG %s %s", x, getattr(cfg, x))
+        for dir_kind in ('srcdir', 'builddir', 'installdir'):
+            logging.info("CONFIG %s %s", dir_kind, getattr(cfg, dir_kind))
 
 
 class DetectCommand(Command):
@@ -250,10 +256,10 @@ class GeneralShellCommand(GeneralRunCommand):
     def get_shell_prompt(self):
         return r",--[Ctrl-d or 'exit' to quit this %s shell for branch '%s']--\n| <%s %s> %s\n\`--[\u@\h \W]\$ " \
             % (self.context.prog, self.vcs_sourcetree.branch_name,
-               self.context.prog, self.name, self.get_run_in_dir(), )
+               self.context.prog, self.name, self.rundir, )
     def run(self):
         self.chdir()
-        # FIXME: Allow using $SHELL or similar.
+        # TODO: Allow using $SHELL or similar.
         progutils.prog_run(['sh'] + list(self.args), self.context,
                            env_update = {'PS1': self.get_shell_prompt()})
 
@@ -306,7 +312,7 @@ class ConfigCommand(SourceClassCommand):
                 print getattr(self.vcs_sourcetree.config, self.args[0])
             else:
                 assert(False)
-        elif len(self.args) == 2:
+        elif len(self.args) == 2 and self.args[0] in git_set_items:
             if self.args[0] == 'builddir':
                 self.vcs_sourcetree.config.builddir = self.args[1]
             elif self.args[0] == 'installdir':

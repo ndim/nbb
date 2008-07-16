@@ -1,6 +1,6 @@
-########################################################################
-# Buildsystem Source Tree plugins
-########################################################################
+"""\
+Buildsystem Source Tree plugins
+"""
 
 
 import os
@@ -54,7 +54,8 @@ class BSSourceTree(plugins.GenericDetectPlugin):
         return super(BSSourceTree, cls).detect(context, vcs_tree)
 
 
-    def get_tree_root(self): return self._get_tree_root()
+    def get_tree_root(self):
+        return self._get_tree_root()
     tree_root = property(get_tree_root)
 
 
@@ -64,15 +65,24 @@ class BSSourceTree(plugins.GenericDetectPlugin):
 
     # Abstract methods
     @plugins.abstractmethod
-    def _get_tree_root(self): pass
+    def _get_tree_root(self):
+        pass
+
     @plugins.abstractmethod
-    def init(self): pass
+    def init(self):
+        pass
+
     @plugins.abstractmethod
-    def configure(self): pass
+    def configure(self):
+        pass
+
     @plugins.abstractmethod
-    def build(self): pass
+    def build(self):
+        pass
+
     @plugins.abstractmethod
-    def install(self): pass
+    def install(self):
+        pass
 
 
 class AutomakeSourceTree(BSSourceTree):
@@ -84,10 +94,10 @@ class AutomakeSourceTree(BSSourceTree):
         srcdir = vcs_tree.tree_root
         self.config = vcs_tree.config
         flag = False
-        for f in [ os.path.join(srcdir, 'configure.ac'),
-                   os.path.join(srcdir, 'configure.in'),
-                   ]:
-            if os.path.exists(f):
+        for fname in [ os.path.join(srcdir, 'configure.ac'),
+                       os.path.join(srcdir, 'configure.in'),
+                       ]:
+            if os.path.exists(fname):
                 flag = True
                 break
         if not flag:
@@ -106,7 +116,8 @@ class AutomakeSourceTree(BSSourceTree):
         if not os.path.exists(os.path.join(self.config.srcdir, 'configure')):
             self.init()
         builddir = self.config.builddir
-        if not os.path.exists(builddir): os.makedirs(builddir)
+        if not os.path.exists(builddir):
+            os.makedirs(builddir)
         os.chdir(builddir)
         progutils.prog_run(["%s/configure" % self.config.srcdir,
                             "--prefix=%s" % self.config.installdir,
@@ -140,9 +151,9 @@ class SconsSourceTree(BSSourceTree):
         srcdir = vcs_tree.tree_root
         self.config = vcs_tree.config
         flag = False
-        for f in [ os.path.join(srcdir, 'SConstruct'),
-                   ]:
-            if os.path.exists(f):
+        for fname in [ os.path.join(srcdir, 'SConstruct'),
+                       ]:
+            if os.path.exists(fname):
                 flag = True
                 break
         if not flag:
@@ -152,8 +163,11 @@ class SconsSourceTree(BSSourceTree):
     def _get_tree_root(self):
         return self.__tree_root
 
-    def init(self): pass
-    def configure(self): pass
+    def init(self):
+        pass
+
+    def configure(self):
+        pass
 
     def build(self):
         progutils.prog_run(["scons"],

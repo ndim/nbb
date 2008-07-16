@@ -7,13 +7,13 @@
 nbb (ndim's branch builder) %(PACKAGE_VERSION)s
 Build, install given branch of source code into a branch specific place
 Copyright (C) 2007, 2008 Hans Ulrich Niedermann <hun@n-dimensional.de>
-TBA: License conditions
+TODO: License conditions
 
 Usage: %(prog)s [general options] <command> [command specific options]
 
 Features:
  * supports git branches
- * supports bzr branches (requires useful branch nick, TBD: bzr config ?)
+ * supports bzr branches (requires useful branch nick, TODO: bzr config ?)
  * does out-of-source-tree builds (in-source-tree-builds unsupported)
  * direct support for automake/autoconf based build systems
 
@@ -40,7 +40,7 @@ Command line interface (implemeted):
     $ %(prog)s [general options] run [--builddir] <command> [<param>...]
     $ %(prog)s [general options] run --installdir <command> [<param>...]
 
-TBD: Command line interface:
+TODO: Command line interface:
 
   Run cleanup commands:
     $ %(prog)s [general options] purge [command specific options]
@@ -49,7 +49,7 @@ TBD: Command line interface:
         --installdir-only
     $ %(prog)s [general options] purge-all    # either this
     $ %(prog)s [general options] purge --all  # or that
-    TBD: 'make clean', 'make distclean' and similar stuff?
+    TODO: 'make clean', 'make distclean' and similar stuff?
 
 Global options:
 
@@ -76,19 +76,23 @@ from nbblib import progutils
 
 
 def print_version(context):
+    """print nbb version"""
     print "%(prog)s (ndim's branch builder) %(PACKAGE_VERSION)s" % context
 
 
 def print_help(context):
+    """print general nbb help text"""
     print __doc__ % context,
 
 
 class PropertySetAgainError(Exception):
+    """To be raised in case of setting a property for the second time"""
     def __str__(self):
         return "Property cannot be set more than once"
 
 
 class InvalidPropertyValue(Exception):
+    """To be raised when the value assigned to a property is invalid"""
     def __init__(self, value):
         super(InvalidPropertyValue, self).__init__()
         self.value = value
@@ -97,6 +101,7 @@ class InvalidPropertyValue(Exception):
 
 
 class Property(object):
+    """Context property base class for command line context"""
     def __init__(self, *args, **kwargs):
         assert(len(args) == 0)
         if 'default' in kwargs:
@@ -123,7 +128,8 @@ class Property(object):
             setattr(instance, self.name, self.convert(value))
     def __str__(self):
         if hasattr(self, 'default'):
-            return '<property %s defaulting to %s>' % (self.__class__.__name, self.default)
+            return '<property %s defaulting to %s>' \
+                % (self.__class__.__name__, self.default)
         else:
             return '<property %s>' % (self.__class__.__name__)
     def isvalid(self, value):
@@ -187,10 +193,9 @@ class Context(object):
     def __str__(self):
         kk = [x for x in dir(self) if (x.find('__') < 0) and (x.find('--') < 0)]
         kk.sort()
-        lll = ( (k, getattr(self,k)) for k in kk )
-        return "%s(%s)" % (self.__class__.__name__,
-                           ", ".join(("%s=%s" % (a,repr(c))
-                                      for a,c in lll)))
+        lll = ( (k, getattr(self, k)) for k in kk )
+        it = ( "%s=%s" % (a, repr(c)) for a, c in lll )
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(it))
 
 
 def main(argv):
@@ -205,7 +210,7 @@ def main(argv):
             "%(prog)s requires some arguments" % context)
 
     i = 1
-    while i<len(argv):
+    while i < len(argv):
         if argv[i][0] != '-':
             break
         elif argv[i] in ('-h', '--help'):
@@ -218,13 +223,13 @@ def main(argv):
             context.dry_run = True
         elif argv[i] in ('-b', '--build-system'):
             i = i + 1
-            assert(i<len(argv))
+            assert(i < len(argv))
             context.bs = argv[i]
         elif argv[i][:15] == '--build-system=':
             context.bs = argv[i][6:]
         elif argv[i] in ('-v', '--vcs'):
             i = i + 1
-            assert(i<len(argv))
+            assert(i < len(argv))
             context.vcs = argv[i]
         elif argv[i][:6] == '--vcs=':
             context.vcs = argv[i][6:]

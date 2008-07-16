@@ -10,7 +10,7 @@ import sys
 import os
 
 PACKAGE_VERSION = "@PACKAGE_VERSION@"
-if sys.version_info < (2,4):
+if sys.version_info < (2, 4):
     print "Fatal: This program requires Python 2.4 or later."
     sys.exit(3)
 
@@ -18,6 +18,7 @@ import logging # since python 2.3
 
 
 def logmain(argv):
+    """set up logging module"""
     # funcName: Since python 2.5
     # format="%(filename)s:%(lineno)d:%(funcName)s:"
     logformat = "%(levelname)s: %(message)s"
@@ -28,7 +29,7 @@ def logmain(argv):
             del argv[i]
             loglevel = logging.DEBUG
         elif argv[i] in ('--info', ):
-	    del argv[i]
+            del argv[i]
             loglevel = logging.INFO
         else:
             i += 1
@@ -43,6 +44,7 @@ def logmain(argv):
 
 
 def nbbmain(argv):
+    """nbb main program"""
     logmain(argv)
     pkgpythondir = "@pkgpythondir@"
     lib_found = False
@@ -58,15 +60,15 @@ def nbbmain(argv):
             sys.path = path
             try:
                 import nbblib
-                logging.debug("nbb.PACKAGE_VERSION %s, nbblib.PACKAGE_VERSION %s",
+                logging.debug("PACKAGE_VERSION from nbb: %s, from nbblib: %s",
                               PACKAGE_VERSION, nbblib.PACKAGE_VERSION)
                 assert(nbblib.PACKAGE_VERSION == PACKAGE_VERSION)
                 lib_found = True
                 break
-            except AssertionError, e:
+            except AssertionError:
                 logging.debug("Assertion error", exc_info=True)
                 sys.path = orig_path
-            except ImportError, e:
+            except ImportError:
                 logging.debug("Import error", exc_info=True)
                 sys.path = orig_path
     if not lib_found:
