@@ -14,6 +14,17 @@ nbblib_PYTHON += src/nbblib/plugins.py
 nbblib_PYTHON += src/nbblib/progutils.py
 nbblib_PYTHON += src/nbblib/vcs.py
 
+lint: lint-local
+
+lint-local: lint-local-pylint
+lint-local: lint-local-pychecker
+
+lint-local-pylint:
+	cd src && pylint --zope=y --acquired-members=name,plugins nbb nbblib
+
+lint-local-pychecker:
+	cd src && pychecker --limit=500 $$(for f in nbblib/*.py; do echo nbblib.$$(basename "$$f" .py); done)
+
 # Put all python source files, whether changed or verbatim,
 # into builddir, such that we can run tests in builddir.
 ALL_LOCAL += all-local-nbblib
