@@ -65,7 +65,7 @@ all-local-nbblib-pydoc: all-local-nbblib
 		if test "$$rebuild" = "yes"; then \
 			echo $(PYDOC) -w "$${mod}"; \
 			( cd src && $(PYDOC) -w "$${mod}" ); \
-			if test -f "$$htmlfile" && cmp "src/$${mod}.html" "$$htmlfile"; \
+			if test -f "$$htmlfile" && cmp "src/$${mod}.html" "$$htmlfile" > /dev/null; \
 			then rm -f "src/$${mod}.html"; \
 			else echo "INFO: Updating pydoc/$${mod}.html"; \
 			     mv -f "src/$${mod}.html" "$$htmlfile"; fi; \
@@ -99,7 +99,7 @@ src/nbb: src/nbb.in $(nodist_nbblib_PYTHON) $(nbblib_PYTHON) Makefile
 		$(GREP) '@[a-zA-Z0-9_]\{1,\}@' src/nbb.new; \
 		exit 1; \
 	fi
-	@if test -f src/nbb && cmp src/nbb.new src/nbb; \
+	@if test -f src/nbb && cmp src/nbb.new src/nbb > /dev/null; \
 	then rm -f src/nbb.new; \
 	else mv -f src/nbb.new src/nbb; echo "INFO: Updating src/nbb"; fi
 	@chmod +x src/nbb

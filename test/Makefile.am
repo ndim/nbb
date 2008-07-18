@@ -87,7 +87,7 @@ $(srcdir)/testsuite.at: $(TESTCASES) Makefile.in
 		done; \
 	} > testsuite.at.new
 	@if test -f $(srcdir)/testsuite.at \
-	 && cmp testsuite.at.new $(srcdir)/testsuite.at; \
+	 && cmp testsuite.at.new $(srcdir)/testsuite.at > /dev/null; \
 	then rm -f testsuite.at.new; \
 	else echo "INFO: Updating $(srcdir)/testsuite.at"; \
 	     mv -f testsuite.at.new $(srcdir)/testsuite.at; fi
@@ -99,7 +99,7 @@ $(srcdir)/$(TESTSUITE): testsuite.at local.at package.m4 $(TESTCASES)
 	AUTOM4TE="$(AUTOM4TE)"; \
 	if test "x$${AUTOM4TE}" = "x"; then AUTOM4TE="autom4te"; fi; \
 	$${AUTOM4TE} --language=autotest -I '$(srcdir)' -o $(TESTSUITE).tmp $(srcdir)/testsuite.at
-	@if test -f $(srcdir)/$(TESTSUITE) && cmp $(TESTSUITE).tmp $(srcdir)/$(TESTSUITE); \
+	@if test -f $(srcdir)/$(TESTSUITE) && cmp $(TESTSUITE).tmp $(srcdir)/$(TESTSUITE) > /dev/null; \
 	then rm -f $(TESTSUITE).tmp; \
 	else echo "INFO: Updating $(srcdir)/$(TESTSUITE)"; \
 	     mv -f $(TESTSUITE).tmp $(srcdir)/$(TESTSUITE); fi
