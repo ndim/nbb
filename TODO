@@ -15,6 +15,8 @@ nbb-0.1 (done)
 nbb-0.2
  * Make sure the "if cmp ... mv .. rm" in make rules are correct and useful,
    and the cmp is silent.
+ - License review. Every source file needs a license. Trace back origin
+   of all code.
  - Useful logging infrastructure, and --debug etc user interface.
  - Store config in ${srcdir}/.nbb.conf instead of 'git config'.
    More portable. bzr does not have a config interface, for example.
