@@ -18,7 +18,7 @@ dnl ===================================================================
 AT_SETUP([nbb detect-vcs: git detection ])
 AT_KEYWORDS([nbb detect vcs git])
 AT_CHECK([mkdir test.git && cd test.git])
-AT_CHECK([cd test.git && git init], [0],
+AT_CHECK([cd test.git && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_CHECK([echo "VCS: git $PWD/test.git" > expout
@@ -43,7 +43,7 @@ AT_SETUP([nbb detect-vcs: bzr AND git ambigous repository])
 AT_KEYWORDS([nbb detect vcs bzr git])
 AT_CHECK([mkdir test.bzrgit && cd test.bzrgit])
 AT_CHECK([cd test.bzrgit && bzr init && bzr nick testnick])
-AT_CHECK([cd test.bzrgit && git init], [0],
+AT_CHECK([cd test.bzrgit && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_CHECK([echo "ERROR: Ambigous VCS types detected for '$PWD/test.bzrgit':
@@ -59,7 +59,7 @@ dnl ===================================================================
 AT_SETUP([nbb detect-bs: automake detection ])
 AT_KEYWORDS([nbb detect bs automake])
 AT_CHECK([mkdir test.git && cd test.git])
-AT_CHECK([cd test.git && git init], [0],
+AT_CHECK([cd test.git && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_DATA([test.git/configure.ac], [dnl
@@ -76,7 +76,7 @@ dnl ===================================================================
 AT_SETUP([nbb detect-bs: scons detection])
 AT_KEYWORDS([nbb detect bs scons])
 AT_CHECK([mkdir test.git && cd test.git])
-AT_CHECK([cd test.git && git init], [0],
+AT_CHECK([cd test.git && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_DATA([test.git/SConstruct], [dnl
@@ -92,7 +92,7 @@ dnl ===================================================================
 AT_SETUP([nbb detect-bs: automake AND scons detection ])
 AT_KEYWORDS([nbb detect bs scons automake])
 AT_CHECK([mkdir test.git && cd test.git])
-AT_CHECK([cd test.git && git init], [0],
+AT_CHECK([cd test.git && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_DATA([test.git/configure.ac], [dnl
@@ -114,7 +114,7 @@ dnl ===================================================================
 AT_SETUP([nbb detect-bs: no BS detection])
 AT_KEYWORDS([nbb detect bs])
 AT_CHECK([mkdir test.git && cd test.git])
-AT_CHECK([cd test.git && git init], [0],
+AT_CHECK([cd test.git && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_CHECK([echo "ERROR: Unknown BS source tree type: '$PWD/test.git'" > experr

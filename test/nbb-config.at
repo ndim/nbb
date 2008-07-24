@@ -8,7 +8,7 @@ dnl ===================================================================
 AT_SETUP([nbb config: git defaults])
 AT_KEYWORDS([nbb git config])
 AT_CHECK([mkdir test.git && cd test.git])
-AT_CHECK([cd test.git && git init], [0],
+AT_CHECK([cd test.git && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_DATA([test.git/configure.ac], [dnl
@@ -29,7 +29,7 @@ dnl ===================================================================
 AT_SETUP([nbb config: git set/get])
 AT_KEYWORDS([nbb git config])
 AT_CHECK([mkdir test.git && cd test.git])
-AT_CHECK([cd test.git && git init], [0],
+AT_CHECK([cd test.git && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])
 AT_DATA([test.git/configure.ac], [dnl

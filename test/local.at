@@ -36,10 +36,16 @@ $(if test "${NBB_SCRIPT-nbb}" = "nbb"; then echo "nbb"; else echo $PYTHON $NBB_S
 ])dnl
 
 
+dnl AT_GIT_INIT_OUTPUT_CANONICAL
+m4_define([AT_GIT_INIT_OUTPUT_CANONICAL], [dnl
+sed 's|^Initialized empty Git repository in @<:@a-zA-Z0-9/\._-@:>@\{1,\}.git/$|Initialized empty Git repository in .git/|' dnl
+])dnl
+
+
 dnl AT_WRAP_GIT([stuff-to-do-with-git-repo])dnl
 m4_define([AT_WRAP_GIT], [dnl
 AT_CHECK([mkdir test.dir && cd test.dir])
-AT_CHECK([cd test.dir && git init], [0],
+AT_CHECK([cd test.dir && git init | AT_GIT_INIT_OUTPUT_CANONICAL], [0],
 [Initialized empty Git repository in .git/
 ])dnl
 $1
