@@ -44,7 +44,7 @@ dnl ===================================================================
 
 AT_SETUP([nbb automake: make distcheck])
 AT_KEYWORDS([nbb automake make distcheck])
-AT_WRAP_GIT_AM([dl
+AT_WRAP_GIT_AM([dnl
 AT_CHECK([cd test.dir && AT_NBB configure], [0], [ignore], [ignore])
 AT_CHECK([cd test.dir && AT_NBB make distcheck], [0], [ignore], [ignore])
 ])
