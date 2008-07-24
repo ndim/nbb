@@ -124,13 +124,17 @@ class AutomakeSourceTree(BSSourceTree):
                             "--enable-maintainer-mode",
                             ], self.context)
 
-    def build(self):
+    def make(self, *make_args):
         """'make'"""
         builddir = self.config.builddir
         if not os.path.exists(os.path.join(builddir, 'config.status')):
             self.configure()
         os.chdir(builddir)
-        progutils.prog_run(["make", ], self.context)
+        progutils.prog_run(["make"] + list(make_args), self.context)
+
+    def build(self):
+        """'make'"""
+        self.make()
 
     def install(self):
         """'make install'"""

@@ -15,6 +15,7 @@ nbb-0.1 (done)
 nbb-0.2
  * Make sure the "if cmp ... mv .. rm" in make rules are correct and useful,
    and the cmp is silent.
+ * Make automake's "nbb make" depend on configure etc.
  - License review. Every source file needs a license. Trace back origin
    of all code.
  - Useful logging infrastructure, and --debug etc user interface.
@@ -48,7 +49,6 @@ nbb-0.9 or earlier
     - Man page or something similar. Generate from help texts?
  - Command aliases:
      make -> build    (for automake, or similar mapping)
- - Make automake's "nbb make" depend on configure etc.
  - Test sh command like run command.
 
 

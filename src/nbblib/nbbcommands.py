@@ -210,9 +210,12 @@ class MakeCommand(SourceClassCommand):
     summary = 'run make in builddir'
     validate_args = Command.validate_args_any
     def run(self):
-        os.chdir(self.bs_sourcetree.config.builddir)
-        progutils.prog_run(["make"] + list(self.args),
-                           self.context)
+        if hasattr(self.bs_sourcetree, 'make'):
+            self.bs_sourcetree.make(*self.args)
+        else:
+            os.chdir(self.bs_sourcetree.config.builddir)
+            progutils.prog_run(["make"] + list(self.args),
+                               self.context)
 
 
 class GeneralRunCommand(SourceClassCommand):
