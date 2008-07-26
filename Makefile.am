@@ -47,6 +47,7 @@ endif
 
 # Requires git 1.5 to work properly.
 if HAVE_GIT
+# Usage: $ make tag VER=1.2
 tag:
 	test -d "$(top_srcdir)/.git"
 	@cd "$(top_srcdir)" && $(GIT) status;:
@@ -56,15 +57,15 @@ tag:
 	@cd "$(top_srcdir)" && if $(GIT) diff-index --cached --quiet HEAD; then :; else \
 		echo "Uncommitted cached changes detected."; \
 		exit 2; fi
-	@if test "x$(TAG)" = "x"; then \
-		echo "TAG not defined. Try 'make tag TAG=2.11' or something similar."; \
+	@if test "x$(VER)" = "x"; then \
+		echo "VER not defined. Try 'make tag VER=2.11' or something similar."; \
 		exit 3; \
         fi
-	@test "x$$(echo "$(TAG)" | $(SED) 's/^[0-9]\{1,\}\.[0-9]\{1,\}//')" = "x" || { \
-		echo "TAG=$(TAG) is not in numerical 'x.y' format."; \
+	@test "x$$(echo "$(VER)" | $(SED) 's/^[0-9]\{1,\}\.[0-9]\{1,\}//')" = "x" || { \
+		echo "VER=$(VER) is not in numerical 'x.y' format."; \
 		exit 4; }
-	@test "x$$($(SED) '1q' '$(top_srcdir)/NEWS')" = "x$(PACKAGE_TARNAME) $(TAG)" || { \
-		echo "NEWS does not start with entry for '$(PACKAGE_TARNAME) $(TAG)'"; \
+	@test "x$$($(SED) '1q' '$(top_srcdir)/NEWS')" = "x$(PACKAGE_TARNAME) $(VER)" || { \
+		echo "NEWS does not start with entry for '$(PACKAGE_TARNAME) $(VER)'"; \
 		exit 5; }
 	@$(SED) -n '1p; 2,/^$(PACKAGE_TARNAME) / p' '$(top_srcdir)/NEWS' \
 		| $(SED) '$$ { /^$(PACKAGE_TARNAME) / d }' | $(SED) '$$ { /^$$/d }' \
@@ -72,10 +73,10 @@ tag:
 	@echo "======================================================================="
 	@cat TAG-MESSAGE
 	@echo "======================================================================="
-	@echo "Do you really want to tag this as release 'v$(TAG)'? Enter to continue, Ctrl-C to abort."
+	@echo "Do you really want to tag this as release '$(PACKAGE_TARNAME)-$(VER)'? Enter to continue, Ctrl-C to abort."
 	@read
 	msgfile="$$PWD/TAG-MESSAGE"; \
-	cd "$(top_srcdir)" && $(GIT) tag -s -F "$$msgfile" "$(PACKAGE_TARNAME)-$(TAG)"; \
+	cd "$(top_srcdir)" && $(GIT) tag -s -F "$$msgfile" "$(PACKAGE_TARNAME)-$(VER)"; \
 	rm -f "$$msgfile"
 endif
 
