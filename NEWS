@@ -1,4 +1,6 @@
-nbb 0.1.x
+nbb 0.2
+  * Switch to release tags including the package name
+  * Make automake's "nbb make" depend on configure etc.
 
 nbb 0.1
   * Initial public standalone version of nbb.

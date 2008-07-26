@@ -75,7 +75,7 @@ tag:
 	@echo "Do you really want to tag this as release 'v$(TAG)'? Enter to continue, Ctrl-C to abort."
 	@read
 	msgfile="$$PWD/TAG-MESSAGE"; \
-	cd "$(top_srcdir)" && $(GIT) tag -s -F "$$msgfile" "v$(TAG)"; \
+	cd "$(top_srcdir)" && $(GIT) tag -s -F "$$msgfile" "$(PACKAGE_TARNAME)-$(TAG)"; \
 	rm -f "$$msgfile"
 endif
 
